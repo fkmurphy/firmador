@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="CompilerConfiguration">
+    <option name="USE_RELEASE_OPTION" value="false" />
     <wildcardResourcePatterns>
       <entry name="!?*.java" />
       <entry name="!?*.form" />
@@ -19,8 +20,13 @@
         <module name="Firmador" />
       </profile>
     </annotationProcessing>
-    <bytecodeTargetLevel target="11">
-      <module name="Firmador" target="11" />
+    <bytecodeTargetLevel target="9">
+      <module name="Firmador" target="9" />
     </bytecodeTargetLevel>
+  </component>
+  <component name="JavacSettings">
+    <option name="ADDITIONAL_OPTIONS_OVERRIDE">
+      <module name="Firmador" options="--add-exports jdk.crypto.cryptoki/sun.security.pkcs11=Firmador" />
+    </option>
   </component>
 </project>
