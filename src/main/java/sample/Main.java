@@ -9,7 +9,8 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
-
+import token.GemaltoToken;
+import token.Token;
 import java.io.*;
 import java.security.Provider;
 import java.security.KeyStore;
@@ -29,8 +30,6 @@ import java.util.Date;
 public class Main extends Application {
     private static final String NEW_LINE = "\n";
     private static final long TICKS_POR_DIA = 1000 * 60 * 60 * 24;
-
-    private static final String SUN_PKCS11_PROVIDERNAME = "SunPKCS11";
     private static final String TOKEN_PIN_STRING = "USTAW_PIN";
     private static final char[] TOKEN_PIN = TOKEN_PIN_STRING.toCharArray();
     @Override
@@ -41,22 +40,10 @@ public class Main extends Application {
         primaryStage.show();
     }
     public static void algo() {
-        /*final String name = "ANY_NAME";
-        final String library = "";
-        final String slot = "1";
-        StringBuilder builder = new StringBuilder();
 
-        builder.append("name=SmartCard\n");
-        builder.append("showInfo=");
-        builder.append("library="+library);
-         */
-        Provider prototype = Security.getProvider("SunPKCS11");
-        Provider provider1 = prototype.configure(getConfig());
-        Security.addProvider(provider1);
+        Token token = new GemaltoToken();
+        Provider provider1 = token.getProvider();
 
-        System.out.println(provider1.getInfo());
-
-        KeyStore pkcss11KS = null;
         try {
             char[]  password = getPassword().toCharArray();
             KeyStore keystore = KeyStore.getInstance("PKCS11", provider1);
@@ -138,9 +125,6 @@ public class Main extends Application {
 
     }
 
-    public static String getConfig(){
-        return Main.class.getClassLoader().getResource("pkcs11.cfg").getFile();
-    }
     private static String getPassword() throws IOException {
         String file = Main.class.getClassLoader().getResource("password.txt").getFile();
         FileReader reader = new FileReader(file);
