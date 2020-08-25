@@ -6,4 +6,5 @@ module Firmador {
     requires itextpdf;
 
     opens sample;
+    opens token;
 }
