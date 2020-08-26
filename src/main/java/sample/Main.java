@@ -25,9 +25,7 @@ public class Main extends Application {
         Parent root = FXMLLoader.load(getClass().getClassLoader().getResource("sample.fxml"));
         primaryStage.setTitle("Firmador");
         primaryStage.setScene(new Scene(root, 800, 600));
-        FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("Open Resource File");
-        fileChooser.showOpenDialog(primaryStage);
+        
         primaryStage.show();
     }
 
@@ -36,7 +34,6 @@ public class Main extends Application {
         Token token = new GemaltoToken();
         String src = Main.class.getClassLoader().getResource("uno.pdf").getFile();
         String dest = String.format("/home/jmurphy/hola2.pdf",1);
-
         token.sign(src, String.format(dest, 1));
     }
 
