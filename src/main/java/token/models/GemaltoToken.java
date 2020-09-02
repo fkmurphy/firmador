@@ -6,42 +6,37 @@ import com.itextpdf.text.pdf.PdfReader;
 import com.itextpdf.text.pdf.PdfSignatureAppearance;
 import com.itextpdf.text.pdf.PdfStamper;
 import com.itextpdf.text.pdf.security.*;
-import sample.Main;
+import init.Main;
 
 import java.io.BufferedReader;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
-import java.security.Provider;
-import java.security.KeyStore;
-import java.security.Security;
-import java.security.UnrecoverableKeyException;
-import java.security.GeneralSecurityException;
-import java.security.KeyStoreException;
-import java.security.Signature;
-import java.security.PrivateKey;
-import java.security.NoSuchAlgorithmException;
+import java.security.*;
 import java.security.cert.*;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.security.cert.Certificate;
+import java.time.LocalDateTime;
+import java.util.*;
 
 public class GemaltoToken implements Token {
     private static final long TICKS_POR_DIA = 1000 * 60 * 60 * 24;
-
+    protected ExternalSignature signature =null;
     protected String driverPath;
+    private char[] pwd;
     protected Provider provider;
-    public GemaltoToken(){
+    public GemaltoToken(String pwd){
         this.driverPath = "";
         Provider prototype = Security.getProvider("SunPKCS11");
         this.provider = prototype.configure(getConfig());
+        this.pwd = pwd.toCharArray();
         Security.addProvider(provider);
+
     }
-    private KeyStore getKeystoreInstance(String pwd){
+    private KeyStore getKeystoreInstance(){
         try {
-            char[]  password = pwd.toCharArray();
+
             KeyStore ks = KeyStore.getInstance("PKCS11", this.provider);
-            ks.load(null, password);
+            ks.load(null, pwd);
             return ks;
         } catch (KeyStoreException e) {
             e.printStackTrace();
@@ -50,7 +45,10 @@ public class GemaltoToken implements Token {
         } catch (NoSuchAlgorithmException e) {
             e.printStackTrace();
         } catch (IOException e) {
-            e.printStackTrace();
+            System.out.println("Una excepción con el token");
+            //e.printStackTrace();
+        } catch (Exception e) {
+            System.out.println("Other exception");
         }
         return null;
     }
@@ -58,13 +56,10 @@ public class GemaltoToken implements Token {
     private X509Certificate getCert(){
         X509Certificate cert = null;
         try {
-            KeyStore keystore = getKeystoreInstance(this.getPassword());
-
-            String alias = keystore.aliases().nextElement();
+            KeyStore ks = getKeystoreInstance();
+            String alias = ks.aliases().nextElement();
             //get Cert
-            cert = (X509Certificate) keystore.getCertificate(alias);
-        } catch (IOException e) {
-            e.printStackTrace();
+            cert = (X509Certificate) ks.getCertificate(alias);
         } catch (KeyStoreException e) {
             e.printStackTrace();
         }
@@ -123,6 +118,7 @@ public class GemaltoToken implements Token {
         return false;
     }
 
+    /*
     private static String getPassword() throws IOException {
         String file = Main.class.getClassLoader().getResource("password.txt").getFile();
         FileReader reader = new FileReader(file);
@@ -130,17 +126,20 @@ public class GemaltoToken implements Token {
         String passwordLine = br.readLine();
         System.out.println(passwordLine);
         return passwordLine;
-    }
+    }*/
     public void sign(String src, String dst){
         try {
-            String password = this.getPassword();
-            KeyStore ks = getKeystoreInstance(password);
+            KeyStore ks = getKeystoreInstance();
             String alias = ks.aliases().nextElement();
-            PrivateKey privKey = (PrivateKey) ks.getKey(alias, password.toCharArray());
+            PrivateKey privKey = (PrivateKey) ks.getKey(alias, pwd);
             Certificate[] chain = ks.getCertificateChain(alias);
+            if(signature == null) {
 
+                signature =
+                        new PrivateKeySignature(privKey, DigestAlgorithms.SHA256, ks.getProvider().getName());
+            }
             processSign(src, dst, chain,privKey, DigestAlgorithms.SHA256,
-                    getProvider().getName(), MakeSignature.CryptoStandard.CMS, "Test 1", "Ghent");
+                    getProvider().getName(), MakeSignature.CryptoStandard.CMS, "TCRN", "Viedma, Río Negro, Argentina");
         } catch (IOException | KeyStoreException e) {
             e.printStackTrace();
         } catch (UnrecoverableKeyException e) {
@@ -159,20 +158,30 @@ public class GemaltoToken implements Token {
                             Certificate[] chain, PrivateKey pk, String digestAlgorithm, String provider,
                             MakeSignature.CryptoStandard subfilter, String reason, String location)
             throws GeneralSecurityException, IOException, DocumentException {
+
+
+        System.out.println("Firmando....");
         // Creating the reader and the stamper
         PdfReader reader = new PdfReader(src);
         FileOutputStream os = new FileOutputStream(dest);
-        PdfStamper stamper = PdfStamper.createSignature(reader, os, '\0');
+        PdfStamper stamper = PdfStamper.createSignature(reader, os, '\0',null,true);
         // Creating the appearance
         PdfSignatureAppearance appearance = stamper.getSignatureAppearance();
         appearance.setReason(reason);
         appearance.setLocation(location);
-        appearance.setVisibleSignature(new Rectangle(36, 748, 144, 780), 1, "sig");
+        appearance.setCertificationLevel(PdfSignatureAppearance.CERTIFIED_FORM_FILLING);
+        System.out.println(LocalDateTime.now().toString());
+        //appearance.setVisibleSignature(new Rectangle(36, 748, 144, 780), 1, "sig"+ Integer.toString((new Random()).nextInt(25)));
         // Creating the signature
         ExternalDigest digest = new BouncyCastleDigest();
-        ExternalSignature signature =
-                new PrivateKeySignature(pk, digestAlgorithm, provider);
+
+        /// ESTA SIGNATURE ES LA QUE TENGO QUE CAMBIAR
+
         MakeSignature.signDetached(appearance, digest, signature, chain,
                 null, null, null, 0, subfilter);
+        System.out.println("Firmado");
+        stamper.close();
+        os.close();
+        reader.close();
     }
 }

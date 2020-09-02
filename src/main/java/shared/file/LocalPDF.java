@@ -1,8 +1,8 @@
-package file;
+package shared.file;
 
-public class PDF {
+public class LocalPDF {
     protected String path;
-    public PDF(String path){
+    public LocalPDF(String path){
         this.path = path;
     }
 

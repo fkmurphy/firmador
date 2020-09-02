@@ -20,8 +20,8 @@
     <orderEntry type="library" name="Maven: org.openjfx:javafx-fxml:11.0.1" level="project" />
     <orderEntry type="library" name="Maven: org.openjfx:javafx-fxml:linux:11.0.1" level="project" />
     <orderEntry type="library" name="Maven: net.java.dev.jna:jna:5.6.0" level="project" />
-    <orderEntry type="library" name="Maven: com.itextpdf:itextpdf:5.3.2" level="project" />
-    <orderEntry type="library" name="Maven: org.bouncycastle:bcprov-jdk15on:1.47" level="project" />
-    <orderEntry type="library" name="Maven: org.bouncycastle:bcpkix-jdk15on:1.47" level="project" />
+    <orderEntry type="library" name="Maven: com.itextpdf:itextpdf:5.5.3" level="project" />
+    <orderEntry type="library" name="Maven: org.bouncycastle:bcprov-jdk15on:1.56" level="project" />
+    <orderEntry type="library" name="Maven: org.bouncycastle:bcpkix-jdk15on:1.56" level="project" />
   </component>
 </module>

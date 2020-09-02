@@ -1,16 +1,16 @@
-package sample;
+package init.models;
 
-import file.PDF;
+import shared.file.LocalPDF;
 import javafx.scene.control.CheckBox;
 
 public class FilesToBeSigned {
-    protected PDF file;
+    protected LocalPDF file;
     protected CheckBox checked;
-    public FilesToBeSigned(PDF file){
+    public FilesToBeSigned(LocalPDF file){
         this.file = file;
         this.checked = new CheckBox();
     }
-    public FilesToBeSigned(PDF file, Boolean checked){
+    public FilesToBeSigned(LocalPDF file, Boolean checked){
         this.file = file;
         this.checked = new CheckBox();
         this.checked.setSelected(checked);
