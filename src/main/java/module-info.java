@@ -4,6 +4,7 @@ module Firmador {
     requires javafx.fxml;
     requires jdk.crypto.cryptoki;
     requires itextpdf;
+    requires org.kordamp.ikonli.javafx;
 
     opens init.controllers  to javafx.fxml;
     opens init.models to javafx.base;

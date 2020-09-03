@@ -2,6 +2,7 @@
 
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ButtonBar?>
 <?import javafx.scene.control.Menu?>
 <?import javafx.scene.control.MenuBar?>
 <?import javafx.scene.control.MenuItem?>
@@ -11,8 +12,9 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Pane?>
 <?import javafx.scene.layout.VBox?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
 
-<VBox minHeight="300.0" minWidth="500.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="init.controllers.Controller">
+<VBox minHeight="300.0" minWidth="500.0" prefHeight="527.0" prefWidth="640.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="init.controllers.Controller">
    <children>
       <MenuBar>
         <menus>
@@ -28,33 +30,40 @@
             </Menu>
         </menus>
       </MenuBar>
-      <HBox>
+      <HBox prefHeight="400.0" prefWidth="516.0">
          <children>
-            <Button fx:id="btn_select_file" alignment="CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minWidth="-Infinity" mnemonicParsing="false" onAction="#selectFile" text="Agregar Archivo" textAlignment="CENTER">
-               <HBox.margin>
-                  <Insets bottom="50.0" left="50.0" right="50.0" top="50.0" />
-               </HBox.margin>
-            </Button>
-            <TableView fx:id="table_files">
+            <Pane prefHeight="200.0" prefWidth="200.0">
+               <children>
+                   <Button fx:id="btn_select_file" alignment="CENTER" contentDisplay="CENTER" layoutX="23.0" layoutY="197.0" maxHeight="-Infinity" maxWidth="-Infinity" minWidth="-Infinity" mnemonicParsing="false" onAction="#selectFile" prefHeight="26.0" prefWidth="154.0" text="Agregar Archivo" textAlignment="CENTER" wrapText="true">
+                     <graphic>
+                           <FontIcon iconLiteral="fa-file-pdf-o" iconSize="15" selectionEnd="0" selectionStart="1" textAlignment="RIGHT" wrappingWidth="148.3271484375" />
+                     </graphic>
+                   </Button>
+               </children>
+            </Pane>
+            <TableView fx:id="table_files" editable="true" fixedCellSize="25.0" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" tableMenuButtonVisible="true" HBox.hgrow="SOMETIMES">
               <columns>
-                <TableColumn fx:id="tb_check_file" maxWidth="1500.0" prefWidth="73.0" text="Firmar" />
-                <TableColumn fx:id="tb_path_file" prefWidth="218.0" text="Archivo" />
-                  <TableColumn maxWidth="1500.0" prefWidth="52.0" text="Info" />
+                <TableColumn fx:id="tb_check_file" maxWidth="1.7976931348623157E308" minWidth="60.0" prefWidth="60.0" text="Firmar" />
+                <TableColumn fx:id="tb_path_file" maxWidth="1.7976931348623157E308" minWidth="300.0" prefWidth="300.0" text="Archivo" />
+                  <TableColumn maxWidth="1.7976931348623157E308" minWidth="60.0" prefWidth="60.0" text="Info" />
               </columns>
-               <columnResizePolicy>
-                  <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
-               </columnResizePolicy>
+               <HBox.margin>
+                  <Insets right="20.0" top="20.0" />
+               </HBox.margin>
             </TableView>
          </children>
       </HBox>
-      <Pane>
-         <children>
-            <PasswordField fx:id="password_token" layoutX="65.0" layoutY="1.0" />
-            <Button fx:id="btn_firmar" layoutX="397.0" layoutY="1.0" mnemonicParsing="false" onAction="#firmarButton" text="Firmar" textAlignment="CENTER" />
-         </children>
+      <ButtonBar maxHeight="-Infinity" nodeOrientation="LEFT_TO_RIGHT" prefHeight="50.0" prefWidth="200.0" VBox.vgrow="SOMETIMES">
+        <buttons>
+            <PasswordField fx:id="password_token" promptText="Contraseña" />
+            <Button fx:id="btn_firmar" mnemonicParsing="false" onAction="#firmarButton" prefHeight="26.0" text="Firmar" textAlignment="CENTER" />
+        </buttons>
          <VBox.margin>
-            <Insets bottom="20.0" top="20.0" />
+            <Insets top="20.0" />
          </VBox.margin>
-      </Pane>
+         <padding>
+            <Insets left="30.0" right="30.0" />
+         </padding>
+      </ButtonBar>
    </children>
 </VBox>

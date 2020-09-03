@@ -5,6 +5,9 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.paint.Color;
+import javafx.util.Callback;
+import org.kordamp.ikonli.javafx.FontIcon;
 import shared.file.LocalPDF;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
@@ -56,8 +59,8 @@ public class Controller implements Initializable {
 
     @FXML
     private ObservableList<FilesToBeSigned> listitems = FXCollections.observableArrayList(
-            new FilesToBeSigned(new LocalPDF("qweqweqwe")),
-            new FilesToBeSigned(new LocalPDF("qweqweqweadasadassd"),true)
+            new FilesToBeSigned(new LocalPDF("qweqweqwe"))
+    //        new FilesToBeSigned(new LocalPDF("qweqweqweadasadassd"),true)
     );
 
     @FXML
@@ -97,10 +100,11 @@ public class Controller implements Initializable {
     @FXML
     void selectFile(ActionEvent event){
         FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("Open Resource File");
+        fileChooser.setTitle("Elegir un archivo");
         File fileSelected = fileChooser.showOpenDialog(new Stage());
         FilesToBeSigned newFile = new FilesToBeSigned(new LocalPDF(fileSelected.getAbsolutePath()),true);
-        table_files.getItems().add(newFile);
+        if(!listitems.contains(newFile))
+            listitems.add(newFile);
         //listitems.add(fileSelected.getAbsolutePath());
         //list_files.refresh();
 
@@ -124,8 +128,63 @@ public class Controller implements Initializable {
         //list_files.setItems(listitems);
         tb_check_file.setCellValueFactory(new PropertyValueFactory<FilesToBeSigned, CheckBox>("checked"));
         tb_path_file.setCellValueFactory(cd -> new SimpleStringProperty(cd.getValue().getFilePath()));
-        //tb_button_info.setCellValueFactory(cd -> new SimpleObjectProperty<Button>(cd.getValue().));
         table_files.setItems(listitems);
+        actionColumn();
+
     }
+
+    private void actionButtonDelete(){
+
+    }
+
+    private void actionColumn(){
+        TableColumn actionCol = new TableColumn("Action");
+
+        Callback<TableColumn<String, String>, TableCell<String, String>> cellFactory
+                = new Callback<TableColumn<String, String>, TableCell<String, String>>() {
+                    @Override
+                    public TableCell call(final TableColumn<String, String> param) {
+                        final TableCell<String, String> cell = new TableCell<String, String>() {
+                            FontIcon plusIcon = new FontIcon("fa-minus");
+                            Button btn = new Button();
+
+                            @Override
+                            public void updateItem(String item, boolean empty) {
+                                super.updateItem(item, empty);
+                                if (empty) {
+                                    setGraphic(null);
+                                    setText(null);
+                                } else {
+                                    plusIcon.setIconSize(15);
+                                    btn.setGraphic(plusIcon);
+                                    btn.setStyle(
+                                            "-fx-background-color:none;"+
+                                            "-fx-border:none"
+                                    );
+                                    btn.setOnMouseEntered(e->{
+                                        plusIcon.setIconColor(Color.web("#ff5900",1.0));
+                                    });
+                                    btn.setOnMouseExited(e -> {
+                                        plusIcon.setIconColor(Color.web("#000",1.0));
+                                    });
+                                    btn.setOnAction(event -> {
+                                        //Person person = getTableView().getItems().get(getIndex());
+                                        listitems.remove(getTableView().getItems().get(getIndex())) ;
+                                    });
+                                    setGraphic(btn);
+                                    setText(null);
+                                }
+                            }
+                        };
+                        return cell;
+                    }
+                };
+
+        //table.setItems(data);
+        actionCol.setCellFactory(cellFactory);
+        table_files.getColumns().addAll(actionCol);
+
+    }
+
 
 }

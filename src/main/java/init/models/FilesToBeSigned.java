@@ -3,6 +3,8 @@ package init.models;
 import shared.file.LocalPDF;
 import javafx.scene.control.CheckBox;
 
+import java.io.File;
+
 public class FilesToBeSigned {
     protected LocalPDF file;
     protected CheckBox checked;
@@ -24,5 +26,13 @@ public class FilesToBeSigned {
     }
     public void setChecked(CheckBox checked){
         this.checked = checked;
+    }
+
+    @Override
+    public boolean equals(Object obj){
+        if(obj == null || getClass() != obj.getClass())
+            return false;
+        return this.getFilePath().compareTo(((FilesToBeSigned)obj).getFilePath()) == 0;
+
     }
 }

@@ -120,7 +120,7 @@ public class GemaltoToken implements Token {
 
     /*
     private static String getPassword() throws IOException {
-        String file = Main.class.getClassLoader().getResource("password.txt").getFile();
+        Servitring file = Main.class.getClassLoader().getResource("password.txt").getFile();
         FileReader reader = new FileReader(file);
         BufferedReader br = new BufferedReader(reader);
         String passwordLine = br.readLine();
