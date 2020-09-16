@@ -1,17 +1,12 @@
-module Firmador {
+module org.openjfx {
     requires javafx.controls;
     requires javafx.graphics;
     requires javafx.fxml;
-    requires jdk.crypto.cryptoki;
-    requires itextpdf;
     requires org.kordamp.ikonli.javafx;
+    requires org.kordamp.ikonli.fontawesome;
+    requires org.kordamp.iconli.core;
+    requires itextpdf;
 
-    opens init.controllers  to javafx.fxml;
-    opens init.models to javafx.base;
-
-    opens token.controllers to javafx.fxml;
-    opens token.models to javafx.base;
-
-    opens init;
-    opens token;
+    opens org.openjfx.models to javafx.base;
+    opens org.openjfx;
 }

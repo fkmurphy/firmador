@@ -1,8 +1,0 @@
-token/SecurityProvider.class
-token/PKCS11Provider.class
-token/models/Token.class
-module-info.class
-token/models/GemaltoToken.class
-sample/Controller.class
-token/controllers/TokenInfoController.class
-sample/Main.class
