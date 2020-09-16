@@ -1,4 +1,4 @@
-package token.models;
+package org.openjfx.token.models;
 
 import java.security.Provider;
 import java.util.Map;

@@ -1,4 +1,4 @@
-package token.controllers;
+package org.openjfx.token.controllers;
 
 import javafx.fxml.Initializable;
 

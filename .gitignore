@@ -1,3 +1,5 @@
 /.idea/
 /src/main/resources/password.txt
 /src/main/resources/*.pdf
+/build/
+/.gradle/
