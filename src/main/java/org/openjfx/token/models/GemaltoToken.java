@@ -33,7 +33,6 @@ public class GemaltoToken implements Token {
     }
     private KeyStore getKeystoreInstance(){
         try {
-
             KeyStore ks = KeyStore.getInstance("PKCS11", this.provider);
             ks.load(null, pwd);
             return ks;

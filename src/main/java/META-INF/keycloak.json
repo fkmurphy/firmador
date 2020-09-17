@@ -1,0 +1,8 @@
+{
+  "realm": "desktop-app-auth",
+  "auth-server-url": "http://localhost:8081/auth",
+  "ssl-required": "external",
+  "resource": "desktop-app",
+  "public-client": true,
+  "use-resource-role-mappings": true
+}
