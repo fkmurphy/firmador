@@ -1,16 +1,16 @@
 package org.openjfx.models;
 
 import javafx.scene.control.CheckBox;
-import org.openjfx.file.LocalPDF;
+import org.openjfx.file.FileRepository;
 
 public class FilesToBeSigned {
-    protected LocalPDF file;
+    protected FileRepository file;
     protected CheckBox checked;
-    public FilesToBeSigned(LocalPDF file){
+    public FilesToBeSigned(FileRepository file){
         this.file = file;
         this.checked = new CheckBox();
     }
-    public FilesToBeSigned(LocalPDF file, Boolean checked){
+    public FilesToBeSigned(FileRepository file, Boolean checked){
         this.file = file;
         this.checked = new CheckBox();
         this.checked.setSelected(checked);

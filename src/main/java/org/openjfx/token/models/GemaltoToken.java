@@ -137,7 +137,8 @@ public class GemaltoToken implements Token {
                         new PrivateKeySignature(privKey, DigestAlgorithms.SHA256, ks.getProvider().getName());
             }
             processSign(src, dst, chain,privKey, DigestAlgorithms.SHA256,
-                    getProvider().getName(), MakeSignature.CryptoStandard.CMS, "TCRN", "Viedma, Río Negro, Argentina");
+                    getProvider().getName(), MakeSignature.CryptoStandard.CMS,
+                    "TCRN", "Viedma, Río Negro, Argentina");
         } catch (IOException | KeyStoreException e) {
             e.printStackTrace();
         } catch (UnrecoverableKeyException e) {
@@ -157,27 +158,25 @@ public class GemaltoToken implements Token {
                             MakeSignature.CryptoStandard subfilter, String reason, String location)
             throws GeneralSecurityException, IOException, DocumentException {
 
-
-        System.out.println("Firmando....");
         // Creating the reader and the stamper
         PdfReader reader = new PdfReader(src);
+
         FileOutputStream os = new FileOutputStream(dest);
         PdfStamper stamper = PdfStamper.createSignature(reader, os, '\0',null,true);
         // Creating the appearance
         PdfSignatureAppearance appearance = stamper.getSignatureAppearance();
         appearance.setReason(reason);
         appearance.setLocation(location);
+        //permitir firmado
         appearance.setCertificationLevel(PdfSignatureAppearance.CERTIFIED_FORM_FILLING);
+
         System.out.println(LocalDateTime.now().toString());
         //appearance.setVisibleSignature(new Rectangle(36, 748, 144, 780), 1, "sig"+ Integer.toString((new Random()).nextInt(25)));
         // Creating the signature
         ExternalDigest digest = new BouncyCastleDigest();
 
-        /// ESTA SIGNATURE ES LA QUE TENGO QUE CAMBIAR
-
         MakeSignature.signDetached(appearance, digest, signature, chain,
                 null, null, null, 0, subfilter);
-        System.out.println("Firmado");
         stamper.close();
         os.close();
         reader.close();

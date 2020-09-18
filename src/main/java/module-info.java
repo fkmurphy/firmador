@@ -9,8 +9,6 @@ module org.openjfx {
     requires java.net.http;
     requires org.json;
     requires jcifs;
-    requires pdfbox;
-    requires pdf2dom;
 
     opens org.openjfx.models to javafx.base;
     opens org.openjfx;

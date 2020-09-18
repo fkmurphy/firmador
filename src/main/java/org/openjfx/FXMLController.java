@@ -37,6 +37,7 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import org.openjfx.file.FileRepository;
 import org.openjfx.file.LocalPDF;
 import org.openjfx.models.FilesToBeSigned;
 import org.openjfx.token.models.GemaltoToken;
@@ -87,16 +88,10 @@ public class FXMLController implements Initializable {
             fileSrc = listFilesSrc.next();
             srcStr = fileSrc.getFilePath();
             indexDot = srcStr.lastIndexOf(".");
-            System.out.println("Algo");
             if(indexDot >= 0) {
                 extension = srcStr.substring(indexDot, srcStr.length());
-                System.out.println(extension);
-                System.out.println(extension.compareTo(".pdf"));
                 if (extension.compareTo(".pdf") == 0) {
-
-                    System.out.println("Se firma "+srcStr);
                     dstStr = srcStr.substring(0, srcStr.lastIndexOf(".")) + "firmado" + ".pdf";
-                    System.out.println(dstStr);
                     token.sign(srcStr, dstStr);
                 }
             }
@@ -112,7 +107,7 @@ public class FXMLController implements Initializable {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Elegir un archivo");
         File fileSelected = fileChooser.showOpenDialog(new Stage());
-        FilesToBeSigned newFile = new FilesToBeSigned(new LocalPDF(fileSelected.getAbsolutePath()),true);
+        FilesToBeSigned newFile = new FilesToBeSigned((FileRepository) new LocalPDF(fileSelected.getAbsolutePath()),true);
         if(!listitems.contains(newFile))
             listitems.add(newFile);
         //listitems.add(fileSelected.getAbsolutePath());

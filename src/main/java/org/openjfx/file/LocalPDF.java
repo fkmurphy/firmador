@@ -1,12 +1,24 @@
 package org.openjfx.file;
 
-public class LocalPDF {
+import jcifs.smb.SmbFileInputStream;
+
+import java.io.InputStream;
+
+public class LocalPDF implements FileRepository{
     protected String path;
+
     public LocalPDF(String path){
         this.path = path;
     }
 
+    @Override
     public String getPath(){
         return this.path;
     }
+
+    @Override
+    public String fileIdentifier() {
+        return null;
+    }
+
 }
