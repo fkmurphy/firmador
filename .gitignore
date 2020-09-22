@@ -3,3 +3,4 @@
 /src/main/resources/*.pdf
 /build/
 /.gradle/
+/src/main/resources/org/openjfx/smb.cfg

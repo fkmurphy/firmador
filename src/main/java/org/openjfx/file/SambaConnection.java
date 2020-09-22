@@ -4,39 +4,41 @@ import jcifs.smb.NtlmPasswordAuthentication;
 import jcifs.smb.SmbFile;
 import org.openjfx.SMBAuth;
 
-import java.net.MalformedURLException;
+import java.io.*;
+import java.nio.file.CopyOption;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 
 public class SambaConnection implements FileRepository{
-    private String domain;
-    private String username;
-    private String password;
+
     private String server;
-    private String path;
-    public SambaConnection (String path)
+    private NtlmPasswordAuthentication smbConnect;
+
+    public SambaConnection ()
     {
-        this.server = "10.114.75.1";
-        this.path = path;
+
 
         SMBAuth auth = new SMBAuth();
         jcifs.Config.setProperty("jcifs.netbios.wins","10.114.75.1");
-        NtlmPasswordAuthentication la = new NtlmPasswordAuthentication(this.domain,this.username,this.password);
-        try {
-            SmbFile in = new SmbFile("smb://"+server+"/actuacion_test/PDF/"+"231/2020/25.pdf", la);
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-        }
-
-    }
-    @Override
-    public String fileIdentifier ()
-    {
-        return null;
+        this.smbConnect = new NtlmPasswordAuthentication(domain,username,password);
     }
 
     @Override
     public String getPath ()
     {
-        return this.path;
+        String dstPath = null;
+        try {
+            SmbFile in = new SmbFile("smb://"+this.server+"/actuacion_test/PDF/"+"231/2020/51.pdf", smbConnect);
+            String fileName = "231_2020_51.pdf";
+            dstPath = System.getProperty("java.io.tmpdir") + "/" + fileName;
+            CopyOption[] options = {REPLACE_EXISTING};
+            Files.copy(in.getInputStream(), Path.of(dstPath), options );
+            in.getInputStream().close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return dstPath;
 
     }
 }

@@ -39,6 +39,7 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import org.openjfx.file.FileRepository;
 import org.openjfx.file.LocalPDF;
+import org.openjfx.file.SambaConnection;
 import org.openjfx.models.FilesToBeSigned;
 import org.openjfx.token.models.GemaltoToken;
 
@@ -72,6 +73,7 @@ public class FXMLController implements Initializable {
 
     @FXML
     private ObservableList<FilesToBeSigned> listitems = FXCollections.observableArrayList(
+            new FilesToBeSigned((FileRepository) new SambaConnection())
             //        new FilesToBeSigned(new LocalPDF("qweqweqweadasadassd"),true)
     );
 
