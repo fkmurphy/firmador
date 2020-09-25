@@ -26,6 +26,8 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.paint.Color;
 import javafx.util.Callback;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.kordamp.ikonli.javafx.FontIcon;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
@@ -37,15 +39,18 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import org.openjfx.backend.BackendConnection;
 import org.openjfx.file.FileRepository;
 import org.openjfx.file.LocalPDF;
 import org.openjfx.file.SambaConnection;
+import org.openjfx.file.WorkflowFiles;
 import org.openjfx.models.FilesToBeSigned;
 import org.openjfx.token.models.GemaltoToken;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.net.http.HttpResponse;
 import java.util.Iterator;
 import java.util.ResourceBundle;
 
@@ -69,11 +74,12 @@ public class FXMLController implements Initializable {
     private TableColumn<FilesToBeSigned, String> tb_path_file;
     @FXML
     private TableColumn<FilesToBeSigned,Button> tb_button_info;
+
     GemaltoToken token = null;
 
     @FXML
     private ObservableList<FilesToBeSigned> listitems = FXCollections.observableArrayList(
-            new FilesToBeSigned((FileRepository) new SambaConnection())
+
             //        new FilesToBeSigned(new LocalPDF("qweqweqweadasadassd"),true)
     );
 
@@ -137,6 +143,28 @@ public class FXMLController implements Initializable {
         tb_path_file.setCellValueFactory(cd -> new SimpleStringProperty(cd.getValue().getFilePath()));
         table_files.setItems(listitems);
         actionColumn();
+
+        BackendConnection bk =  BackendConnection.get("");
+        HttpResponse<String> response = bk.getRequest("documents");
+        JSONArray array = new JSONArray(response.body());
+
+        System.out.println(array.toString());
+        int id,type,number, year;
+        byte[] buffer = new byte[1024];
+        for (int i =0;i<array.length();i++){
+            id =  Integer.parseInt(((JSONObject)array.get(i)).get("id").toString());
+            year = Integer.parseInt(((JSONObject)array.get(i)).get("year").toString());
+            type = Integer.parseInt(((JSONObject)array.get(i)).get("type").toString());
+            number = Integer.parseInt(((JSONObject)array.get(i)).get("number").toString());
+            WorkflowFiles ll = new WorkflowFiles(id,year,type,number);
+            ll.getPath();
+        }
+
+
+        bk.getRequest("documents");
+        /*listitems.add(
+                new FilesToBeSigned((FileRepository) new SambaConnection())
+        );*/
 
     }
 

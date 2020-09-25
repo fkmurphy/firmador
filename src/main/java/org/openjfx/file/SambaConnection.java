@@ -17,10 +17,14 @@ public class SambaConnection implements FileRepository{
 
     public SambaConnection ()
     {
+        this.server = "x.x.x.x";
+        String domain = "xxx-075";
+        String username = "xxxxx";
+        String password = "xxxxx";
 
 
         SMBAuth auth = new SMBAuth();
-        jcifs.Config.setProperty("jcifs.netbios.wins","10.114.75.1");
+        jcifs.Config.setProperty("jcifs.netbios.wins","x.x.x.x");
         this.smbConnect = new NtlmPasswordAuthentication(domain,username,password);
     }
 
@@ -40,5 +44,10 @@ public class SambaConnection implements FileRepository{
         }
         return dstPath;
 
+    }
+
+    @Override
+    public String representativeName() {
+        return getPath();
     }
 }

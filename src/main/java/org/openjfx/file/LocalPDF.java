@@ -16,4 +16,9 @@ public class LocalPDF implements FileRepository{
         return this.path;
     }
 
+    @Override
+    public String representativeName() {
+        return getPath();
+    }
+
 }

@@ -26,7 +26,6 @@ public class HelloFX extends Application {
     @Override
     public void start(Stage stage) throws Exception {
         Parent root = FXMLLoader.load(getClass().getResource("scene.fxml"));
-        //BackendConnection bk = new BackendConnection();
         Scene scene = new Scene(root);
         scene.getStylesheets().add(getClass().getResource("styles.css").toExternalForm());
 
@@ -36,7 +35,6 @@ public class HelloFX extends Application {
     }
 
     public static void main(String[] args) {
-
         launch(args);
     }
 

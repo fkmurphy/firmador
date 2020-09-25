@@ -1,6 +1,7 @@
 package org.openjfx.token.models;
 
 import com.itextpdf.text.DocumentException;
+import com.itextpdf.text.Rectangle;
 import com.itextpdf.text.pdf.PdfReader;
 import com.itextpdf.text.pdf.PdfSignatureAppearance;
 import com.itextpdf.text.pdf.PdfStamper;
@@ -17,6 +18,7 @@ import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 
 public class GemaltoToken implements Token {
     private static final long TICKS_POR_DIA = 1000 * 60 * 60 * 24;
@@ -171,7 +173,7 @@ public class GemaltoToken implements Token {
         appearance.setCertificationLevel(PdfSignatureAppearance.CERTIFIED_FORM_FILLING);
 
         System.out.println(LocalDateTime.now().toString());
-        //appearance.setVisibleSignature(new Rectangle(36, 748, 144, 780), 1, "sig"+ Integer.toString((new Random()).nextInt(25)));
+        appearance.setVisibleSignature(new Rectangle(36, 748, 144, 780), 1, "sig"+ Integer.toString((new Random()).nextInt(25)));
         // Creating the signature
         ExternalDigest digest = new BouncyCastleDigest();
 
