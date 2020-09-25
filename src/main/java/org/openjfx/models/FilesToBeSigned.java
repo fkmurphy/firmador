@@ -19,9 +19,13 @@ public class FilesToBeSigned {
     public String getFilePath(){
         return file.getPath();
     }
+
+    public String getRepresentativePath() { return file.representativeName(); }
+
     public CheckBox getChecked(){
         return this.checked;
     }
+
     public void setChecked(CheckBox checked){
         this.checked = checked;
     }
@@ -30,7 +34,7 @@ public class FilesToBeSigned {
     public boolean equals(Object obj){
         if(obj == null || getClass() != obj.getClass())
             return false;
-        return this.getFilePath().compareTo(((FilesToBeSigned)obj).getFilePath()) == 0;
+        return this.getRepresentativePath().compareTo(((FilesToBeSigned)obj).getRepresentativePath()) == 0;
 
     }
 }

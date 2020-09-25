@@ -10,10 +10,10 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 
 
-public class WorkflowFiles implements FileRepository {
+public class WorkflowFile implements FileRepository {
     int id, year, type, number;
 
-    public WorkflowFiles (int id, int year, int type, int number) {
+    public WorkflowFile(int id, int year, int type, int number) {
         this.id = id;
         this.year = year;
         this.type = type;
@@ -23,22 +23,16 @@ public class WorkflowFiles implements FileRepository {
     @Override
     public String getPath() {
         BackendConnection bk = BackendConnection.get("");
-        System.out.println("qweqwew"+this.id);
-        FileOutputStream lala = null;
-            //lala = new FileOutputStream("/tmp/"+this.id+"_"+this.year+"_"+this.number+".pdf");
-            bk.downloadFile("documents/view/"+this.id, "/tmp/"+this.id+"_"+this.year+"_"+this.number+".pdf");
-            //String body = bk.getRequest("documents/view/"+this.id).body();
-            //lala.write(body.getBytes());
 
-            //lala.flush();
-            //lala.close();
+        String dst = System.getProperty("java.io.tmpdir") + "/" +this.id+"_"+this.year+"_"+this.number+".pdf";
+        bk.downloadFile("documents/view/"+this.id, dst);
 
-        return "";
+        return dst;
     }
 
     @Override
     public String representativeName() {
-        return null;
+        return "un id: "+this.id;
     }
     //year
     //type

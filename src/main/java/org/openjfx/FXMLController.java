@@ -42,8 +42,7 @@ import javafx.stage.Stage;
 import org.openjfx.backend.BackendConnection;
 import org.openjfx.file.FileRepository;
 import org.openjfx.file.LocalPDF;
-import org.openjfx.file.SambaConnection;
-import org.openjfx.file.WorkflowFiles;
+import org.openjfx.file.WorkflowFile;
 import org.openjfx.models.FilesToBeSigned;
 import org.openjfx.token.models.GemaltoToken;
 
@@ -140,7 +139,7 @@ public class FXMLController implements Initializable {
     public void initialize(URL url, ResourceBundle resourceBundle) {
         //list_files.setItems(listitems);
         tb_check_file.setCellValueFactory(new PropertyValueFactory<FilesToBeSigned, CheckBox>("checked"));
-        tb_path_file.setCellValueFactory(cd -> new SimpleStringProperty(cd.getValue().getFilePath()));
+        tb_path_file.setCellValueFactory(cd -> new SimpleStringProperty(cd.getValue().getRepresentativePath()));
         table_files.setItems(listitems);
         actionColumn();
 
@@ -151,17 +150,18 @@ public class FXMLController implements Initializable {
         System.out.println(array.toString());
         int id,type,number, year;
         byte[] buffer = new byte[1024];
+        WorkflowFile ll = null;
         for (int i =0;i<array.length();i++){
             id =  Integer.parseInt(((JSONObject)array.get(i)).get("id").toString());
             year = Integer.parseInt(((JSONObject)array.get(i)).get("year").toString());
             type = Integer.parseInt(((JSONObject)array.get(i)).get("type").toString());
             number = Integer.parseInt(((JSONObject)array.get(i)).get("number").toString());
-            WorkflowFiles ll = new WorkflowFiles(id,year,type,number);
-            ll.getPath();
+            ll = new WorkflowFile(id,year,type,number);
+            listitems.add( new FilesToBeSigned((FileRepository) ll));
         }
+        bk.sendFile(ll.getPath());
 
 
-        bk.getRequest("documents");
         /*listitems.add(
                 new FilesToBeSigned((FileRepository) new SambaConnection())
         );*/
