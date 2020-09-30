@@ -16,6 +16,11 @@ public class FilesToBeSigned {
         this.checked.setSelected(checked);
     }
 
+    public FileRepository getFile()
+    {
+        return this.file;
+    }
+
     public String getFilePath(){
         return file.getPath();
     }

@@ -162,7 +162,8 @@ public class GemaltoToken implements Token {
 
         // Creating the reader and the stamper
         PdfReader reader = new PdfReader(src);
-
+        Rectangle lala = reader.getPageSize(reader.getNumberOfPages());
+        System.out.println("size"+lala.toString()+"bottom"+lala.getBottom()+"borderwidh:"+lala.getBorderWidth());
         FileOutputStream os = new FileOutputStream(dest);
         PdfStamper stamper = PdfStamper.createSignature(reader, os, '\0',null,true);
         // Creating the appearance
@@ -173,7 +174,11 @@ public class GemaltoToken implements Token {
         appearance.setCertificationLevel(PdfSignatureAppearance.CERTIFIED_FORM_FILLING);
 
         System.out.println(LocalDateTime.now().toString());
-        appearance.setVisibleSignature(new Rectangle(36, 748, 144, 780), 1, "sig"+ Integer.toString((new Random()).nextInt(25)));
+        int lastPage = reader.getNumberOfPages();
+        // 40 = 1cm
+        // 40 init x | 40 init y (1cmX x 1cmY)
+        // 40+120 | 40 + 40
+        appearance.setVisibleSignature(new Rectangle(40, 40, 40+120, 40+40), lastPage, "sig"+ Integer.toString((new Random()).nextInt(25)));
         // Creating the signature
         ExternalDigest digest = new BouncyCastleDigest();
 

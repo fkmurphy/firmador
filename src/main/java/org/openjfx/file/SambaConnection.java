@@ -10,7 +10,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 
-public class SambaConnection implements FileRepository{
+@Deprecated
+public class SambaConnection {// implements FileRepository{
 
     private String server;
     private NtlmPasswordAuthentication smbConnect;
@@ -28,7 +29,7 @@ public class SambaConnection implements FileRepository{
         this.smbConnect = new NtlmPasswordAuthentication(domain,username,password);
     }
 
-    @Override
+    //@Override
     public String getPath ()
     {
         String dstPath = null;
@@ -46,7 +47,7 @@ public class SambaConnection implements FileRepository{
 
     }
 
-    @Override
+    //@Override
     public String representativeName() {
         return getPath();
     }

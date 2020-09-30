@@ -91,17 +91,9 @@ public class FXMLController implements Initializable {
         String dstStr, srcStr, extension;
         int indexDot;
         while(listFilesSrc.hasNext()){
-
             fileSrc = listFilesSrc.next();
-            srcStr = fileSrc.getFilePath();
-            indexDot = srcStr.lastIndexOf(".");
-            if(indexDot >= 0) {
-                extension = srcStr.substring(indexDot, srcStr.length());
-                if (extension.compareTo(".pdf") == 0) {
-                    dstStr = srcStr.substring(0, srcStr.lastIndexOf(".")) + "firmado" + ".pdf";
-                    token.sign(srcStr, dstStr);
-                }
-            }
+            if(fileSrc.getChecked().isSelected())
+                fileSrc.getFile().sign(token);
         }
 //        String src = HelloFX.class.getClassLoader().getResource("uno.pdf").getFile();
         //String dest = String.format("/home/jmurphy/hola2.pdf",1);
@@ -143,13 +135,28 @@ public class FXMLController implements Initializable {
         table_files.setItems(listitems);
         actionColumn();
 
+        processDocumentsBackend();
+
+
+
+
+
+
+
+        /*listitems.add(
+                new FilesToBeSigned((FileRepository) new SambaConnection())
+        );*/
+
+    }
+
+    private void processDocumentsBackend() {
         BackendConnection bk =  BackendConnection.get("");
         HttpResponse<String> response = bk.getRequest("documents");
         JSONArray array = new JSONArray(response.body());
 
-        System.out.println(array.toString());
         int id,type,number, year;
         byte[] buffer = new byte[1024];
+
         WorkflowFile ll = null;
         for (int i =0;i<array.length();i++){
             id =  Integer.parseInt(((JSONObject)array.get(i)).get("id").toString());
@@ -159,12 +166,6 @@ public class FXMLController implements Initializable {
             ll = new WorkflowFile(id,year,type,number);
             listitems.add( new FilesToBeSigned((FileRepository) ll));
         }
-        bk.sendFile(ll.getPath());
-
-
-        /*listitems.add(
-                new FilesToBeSigned((FileRepository) new SambaConnection())
-        );*/
 
     }
 

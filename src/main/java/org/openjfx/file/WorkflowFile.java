@@ -3,6 +3,8 @@ package org.openjfx.file;
 import com.itextpdf.text.pdf.PdfStream;
 import com.itextpdf.text.pdf.codec.Base64;
 import org.openjfx.backend.BackendConnection;
+import org.openjfx.file.helpers.PathHelper;
+import org.openjfx.token.models.Token;
 
 import java.io.*;
 import java.nio.channels.Channels;
@@ -33,6 +35,20 @@ public class WorkflowFile implements FileRepository {
     @Override
     public String representativeName() {
         return "un id: "+this.id;
+    }
+
+
+    @Override
+    public Boolean sign(Token token) {
+        String srcPath = getPath();
+        String dstFilename = PathHelper.generateDestionationPath(srcPath);
+        if (dstFilename != null && dstFilename != ""){
+            token.sign(srcPath, dstFilename);
+            BackendConnection.get("").sendFile(dstFilename,this.id);
+            return true;
+        } else {
+            return false;
+        }
     }
     //year
     //type
