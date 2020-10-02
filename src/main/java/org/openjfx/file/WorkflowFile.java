@@ -24,7 +24,7 @@ public class WorkflowFile implements FileRepository {
 
     @Override
     public String getPath() {
-        BackendConnection bk = BackendConnection.get("");
+        BackendConnection bk = BackendConnection.get();
 
         String dst = System.getProperty("java.io.tmpdir") + "/" +this.id+"_"+this.year+"_"+this.number+".pdf";
         bk.downloadFile("documents/view/"+this.id, dst);
@@ -44,14 +44,11 @@ public class WorkflowFile implements FileRepository {
         String dstFilename = PathHelper.generateDestionationPath(srcPath);
         if (dstFilename != null && dstFilename != ""){
             token.sign(srcPath, dstFilename);
-            BackendConnection.get("").sendFile(dstFilename,this.id);
+            BackendConnection.get().sendFile(dstFilename,this.id);
             return true;
         } else {
             return false;
         }
     }
-    //year
-    //type
-    //number
-    //id
+
 }

@@ -51,6 +51,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.net.http.HttpResponse;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.ResourceBundle;
 
 public class FXMLController implements Initializable {
@@ -76,11 +77,18 @@ public class FXMLController implements Initializable {
 
     GemaltoToken token = null;
 
+    Map<String,String> mapArgument;
+
     @FXML
     private ObservableList<FilesToBeSigned> listitems = FXCollections.observableArrayList(
 
             //        new FilesToBeSigned(new LocalPDF("qweqweqweadasadassd"),true)
     );
+
+    public void setBackendMap(Map<String, String> map) {
+        this.mapArgument = map;
+        processDocumentsBackend();
+    }
 
     @FXML
     void firmarButton(ActionEvent event) {
@@ -135,13 +143,6 @@ public class FXMLController implements Initializable {
         table_files.setItems(listitems);
         actionColumn();
 
-        processDocumentsBackend();
-
-
-
-
-
-
 
         /*listitems.add(
                 new FilesToBeSigned((FileRepository) new SambaConnection())
@@ -150,8 +151,11 @@ public class FXMLController implements Initializable {
     }
 
     private void processDocumentsBackend() {
-        BackendConnection bk =  BackendConnection.get("");
-        HttpResponse<String> response = bk.getRequest("documents");
+        if (!mapArgument.containsKey("api_url"))
+            return;
+        BackendConnection bk =  BackendConnection.get(mapArgument);
+        HttpResponse<String> response = bk.getRequest("/documents/");
+        System.out.println(response.body());
         JSONArray array = new JSONArray(response.body());
 
         int id,type,number, year;

@@ -24,24 +24,27 @@ public class BackendConnection {
     HttpClient client;
     private static BackendConnection bkConnect;
 
-    public static BackendConnection get(String parameters)
+    public static BackendConnection get()
+    {
+        return bkConnect;
+    }
+    public static BackendConnection get(Map<String,String> params)
     {
         if (bkConnect == null) {
-            bkConnect = new BackendConnection(parameters);
+            bkConnect = new BackendConnection(params);
         }
         return bkConnect;
     }
 
-    private BackendConnection (String parameters)
+    private BackendConnection (Map<String,String> params)
     {
-
             this.client = HttpClient.newBuilder()
                     .version(HttpClient.Version.HTTP_2)
                     .connectTimeout(Duration.ofSeconds(20))
                     .build();
 
-            token = "Bearer eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJCV0N6NDNLbnEwUmRDVmF2RkVGc1l1S01FRzZGd0Z6eEpQZUhSSUdtSS00In0.eyJleHAiOjE2MDE1MDIzNzEsImlhdCI6MTYwMTQ2NjM3MSwianRpIjoiM2ZhMGZiOWEtMzAyNC00MGNlLWIxZWMtY2Y0M2EwODMyZTFiIiwiaXNzIjoiaHR0cDovLzE5Mi4xNjguNDIuMjU6ODA4MC9hdXRoL3JlYWxtcy9JbnRlcm5vIiwiYXVkIjpbImZyb250ZW5kX3dvcmtmbG93IiwiYWNjb3VudCJdLCJzdWIiOiJiNzViOTE0My05NzBkLTQ0MTYtOGRhNy1hYWI5NDc2MmRhZjYiLCJ0eXAiOiJCZWFyZXIiLCJhenAiOiJhZG1pbi1jbGkiLCJzZXNzaW9uX3N0YXRlIjoiZWQ4ZmFhMDYtMTAwYy00YmQ0LTllNjUtNjY5ZWRlNTNiMDQ1IiwiYWNyIjoiMSIsImFsbG93ZWQtb3JpZ2lucyI6WyJodHRwOi8vMTkyLjE2OC40Mi4yNSIsImh0dHA6Ly8xMjcuMC4wLjEiLCIqIiwiaHR0cDovL2xvY2FsaG9zdDo0MjAwIl0sInJlYWxtX2FjY2VzcyI6eyJyb2xlcyI6WyJvZmZsaW5lX2FjY2VzcyIsInVtYV9hdXRob3JpemF0aW9uIl19LCJyZXNvdXJjZV9hY2Nlc3MiOnsiZnJvbnRlbmRfd29ya2Zsb3ciOnsicm9sZXMiOlsiZnJvbnRlbmRfd29ya2Zsb3ciLCJtYW5hZ2VyX3NpdGUiLCJ1bWFfcHJvdGVjdGlvbiIsIm1hbmFnZXJfZG9jdW1lbnRhdGlvbiIsInNpZ25lciJdfSwiYWNjb3VudCI6eyJyb2xlcyI6WyJtYW5hZ2UtYWNjb3VudCIsInZpZXctYXBwbGljYXRpb25zIiwidmlldy1jb25zZW50IiwibWFuYWdlLWFjY291bnQtbGlua3MiLCJtYW5hZ2UtY29uc2VudCIsInZpZXctcHJvZmlsZSJdfX0sInNjb3BlIjoiZW1haWwgQW5ndWxhclJvbGVzIGZyb250ZW5kX3JvbGVzIHBvc3RtYW5fcm9sZXMgcHJvZmlsZSBhZG1pbi1jbGkgZnJvbnRlbmRfd29ya2Zsb3ciLCJncm91cHNfbWVtYmVyIjpbXSwiZW1haWxfdmVyaWZpZWQiOmZhbHNlLCJuYW1lIjoiTsOpc3RvciBKdWxpw6FuIE1VUlBIWSIsInByZWZlcnJlZF91c2VybmFtZSI6IjIwMzc2NzI4MDMwIiwiZ2l2ZW5fbmFtZSI6Ik7DqXN0b3IgSnVsacOhbiIsImZhbWlseV9uYW1lIjoiTVVSUEhZIiwiZW1haWwiOiJqbXVycGh5QHRyaWJjdWVudGFzcmlvbmVncm8uZ292LmFyIn0.XFu2tQAS87VPlo2uenMjVY6Whf04LI-Ex4WYTvBb4c72DBIapny83DO1TQUGFDMcaINPQKBq_w1iNoj8H1RFJ4e3jhOOJQIKOta-Jjcm2jfJJ7qUBfhixzL77j1DK-9Q4X9XmarcOiBY4KaGQwOySBVtmtIGGOiulzYSWAZ6hJPMfhQpdRE7AKpNrsMkLBtTao_Ueg1zsGkX_qnSjt3yL0JbVAOAMnZW8INHzM6Er1Ka40ZzJLjrZtnd6FnPVd0CTn9eP56aQtaVArSRKbDJHKvJcTSdu3cPtPMVecBFnp0yfhDkPvxX41SkoYVg2pETBI5SIkAQuJIQlMF2jaEDcg";
-            url = "http://192.168.42.25:8000/api/";
+            token = "Bearer " +  params.get("token");
+            url = "http://" + params.get("api_url");
     }
 
     /**
@@ -51,6 +54,8 @@ public class BackendConnection {
      */
     public HttpResponse<String> getRequest(String documents)
     {
+        System.out.println("LA URL "+this.url+documents + " el token "+this.token);
+
         HttpRequest request = HttpRequest.newBuilder()
                 .GET()
                 .uri(URI.create(this.url+documents))
