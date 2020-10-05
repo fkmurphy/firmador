@@ -14,12 +14,22 @@ import java.nio.file.Files;
 
 public class WorkflowFile implements FileRepository {
     int id, year, type, number;
+    String description;
+
+    public WorkflowFile(int id, int year, int type, int number, String description) {
+        this.id = id;
+        this.year = year;
+        this.type = type;
+        this.number = number;
+        this.description = description;
+    }
 
     public WorkflowFile(int id, int year, int type, int number) {
         this.id = id;
         this.year = year;
         this.type = type;
         this.number = number;
+        this.description = "";
     }
 
     @Override
@@ -34,9 +44,11 @@ public class WorkflowFile implements FileRepository {
 
     @Override
     public String representativeName() {
-        return "un id: "+this.id;
+        return "N°: "+this.number + ", Tipo: " + this.type + " Año: "+ this.year;
     }
 
+    @Override
+    public String getDescription() { return this.description; }
 
     @Override
     public Boolean sign(Token token) {

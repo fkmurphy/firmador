@@ -78,7 +78,6 @@ public class HelloFX extends Application {
                     map.put(processParam[0].replaceAll("=",""),processParam[1]);
                 }
             }
-            System.out.println(map.toString());
         }
 
         return map;

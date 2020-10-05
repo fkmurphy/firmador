@@ -12,7 +12,7 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox minHeight="300.0" minWidth="500.0" prefHeight="527.0" prefWidth="640.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.openjfx.FXMLController">
+<VBox minHeight="300.0" minWidth="500.0" prefHeight="527.0" prefWidth="640.0" stylesheets="@styles.css" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.openjfx.FXMLController">
    <children>
       <MenuBar>
          <menus>
@@ -34,8 +34,7 @@
                <columns>
                   <TableColumn fx:id="tb_check_file" maxWidth="1.7976931348623157E308" minWidth="60.0" prefWidth="60.0" text="Firmar" />
                   <TableColumn fx:id="tb_path_file" maxWidth="1.7976931348623157E308" minWidth="218.0" prefWidth="218.0" text="Archivo" />
-                  <TableColumn maxWidth="1.7976931348623157E308" minWidth="60.0" prefWidth="240.0" text="Tema" />
-                  <TableColumn maxWidth="1.7976931348623157E308" minWidth="58.0" prefWidth="68.0" text="Info" />
+                  <TableColumn fx:id="tb_description" maxWidth="1.7976931348623157E308" minWidth="60.0" prefWidth="240.0" text="Descripcion" />
                </columns>
                <HBox.margin>
                   <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />

@@ -140,7 +140,7 @@ public class GemaltoToken implements Token {
             }
             processSign(src, dst, chain,privKey, DigestAlgorithms.SHA256,
                     getProvider().getName(), MakeSignature.CryptoStandard.CMS,
-                    "TCRN", "Viedma, Río Negro, Argentina");
+                    "-", "Viedma, Río Negro, Argentina");
         } catch (IOException | KeyStoreException e) {
             e.printStackTrace();
         } catch (UnrecoverableKeyException e) {

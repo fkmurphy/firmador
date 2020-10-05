@@ -23,6 +23,7 @@ public class LocalPDF implements FileRepository{
         return getPath();
     }
 
+
     @Override
     public Boolean sign(Token token) {
         String dstFilename = PathHelper.generateDestionationPath(this.path);
@@ -32,6 +33,11 @@ public class LocalPDF implements FileRepository{
         } else {
             return false;
         }
+    }
+
+    @Override
+    public String getDescription() {
+        return "Archivo local";
     }
 
 }

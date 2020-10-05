@@ -50,6 +50,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.net.http.HttpResponse;
+import java.nio.file.Files;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.ResourceBundle;
@@ -74,6 +75,8 @@ public class FXMLController implements Initializable {
     private TableColumn<FilesToBeSigned, String> tb_path_file;
     @FXML
     private TableColumn<FilesToBeSigned,Button> tb_button_info;
+    @FXML
+    private TableColumn<FilesToBeSigned, String> tb_description;
 
     GemaltoToken token = null;
 
@@ -141,6 +144,7 @@ public class FXMLController implements Initializable {
         tb_check_file.setCellValueFactory(new PropertyValueFactory<FilesToBeSigned, CheckBox>("checked"));
         tb_path_file.setCellValueFactory(cd -> new SimpleStringProperty(cd.getValue().getRepresentativePath()));
         table_files.setItems(listitems);
+        tb_description.setCellValueFactory(cd -> new SimpleStringProperty(cd.getValue().getDescriptionFile()));
         actionColumn();
 
 
@@ -155,19 +159,26 @@ public class FXMLController implements Initializable {
             return;
         BackendConnection bk =  BackendConnection.get(mapArgument);
         HttpResponse<String> response = bk.getRequest("/documents/");
-        System.out.println(response.body());
+
+        // TODO: 5/10/20 throwable
+        if (response.statusCode() != 200)
+            return;
+
         JSONArray array = new JSONArray(response.body());
 
         int id,type,number, year;
+        String description;
         byte[] buffer = new byte[1024];
-
+        JSONObject json;
         WorkflowFile ll = null;
         for (int i =0;i<array.length();i++){
-            id =  Integer.parseInt(((JSONObject)array.get(i)).get("id").toString());
-            year = Integer.parseInt(((JSONObject)array.get(i)).get("year").toString());
-            type = Integer.parseInt(((JSONObject)array.get(i)).get("type").toString());
-            number = Integer.parseInt(((JSONObject)array.get(i)).get("number").toString());
-            ll = new WorkflowFile(id,year,type,number);
+            json = (JSONObject)array.get(i);
+            id =  Integer.parseInt(json.get("id").toString());
+            year = Integer.parseInt(json.get("year").toString());
+            type = Integer.parseInt(json.get("type").toString());
+            number = Integer.parseInt(json.get("number").toString());
+            description = json.get("theme").toString();
+            ll = new WorkflowFile(id, year, type, number, description);
             listitems.add( new FilesToBeSigned((FileRepository) ll));
         }
 
