@@ -24,6 +24,7 @@ public class FXMLController implements Initializable {
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.layout.HBox;
 import javafx.scene.paint.Color;
 import javafx.util.Callback;
 import org.json.JSONArray;
@@ -60,10 +61,19 @@ public class FXMLController implements Initializable {
     private PasswordField password_token;
     @FXML
     private MenuItem mi_token;
+
+    /**
+     * Buttons
+     */
     @FXML
     private Button btn_select_file;
     @FXML
     private Button btn_firmar;
+
+    // status file
+    FontIcon failStatusIcon = new FontIcon("fa-close");
+    FontIcon signStatusIcon = new FontIcon("fa-check");
+
     /**
      * Table and Columns
      */
@@ -84,7 +94,6 @@ public class FXMLController implements Initializable {
 
     @FXML
     private ObservableList<FilesToBeSigned> listitems = FXCollections.observableArrayList(
-
             //        new FilesToBeSigned(new LocalPDF("qweqweqweadasadassd"),true)
     );
 
@@ -100,13 +109,19 @@ public class FXMLController implements Initializable {
         Iterator<FilesToBeSigned> listFilesSrc = listitems.iterator();
         FilesToBeSigned fileSrc;
         String dstStr, srcStr, extension;
-        int indexDot;
+        int count = 0;
         while(listFilesSrc.hasNext()){
+
             fileSrc = listFilesSrc.next();
-            if(fileSrc.getChecked().isSelected())
+            if(fileSrc.getChecked().isSelected()){
                 fileSrc.getFile().sign(token);
+                System.out.println(table_files.getColumns().indexOf("Action"));
+            }
+            count++;
+
         }
-//        String src = HelloFX.class.getClassLoader().getResource("uno.pdf").getFile();
+
+        //String src = HelloFX.class.getClassLoader().getResource("uno.pdf").getFile();
         //String dest = String.format("/home/jmurphy/hola2.pdf",1);
         //token.sign(src, String.format(dest, 1));
     }
@@ -161,7 +176,7 @@ public class FXMLController implements Initializable {
         HttpResponse<String> response = bk.getRequest("/documents/");
 
         // TODO: 5/10/20 throwable
-        if (response.statusCode() != 200)
+        if (response == null || response.statusCode() != 200)
             return;
 
         JSONArray array = new JSONArray(response.body());
@@ -196,8 +211,12 @@ public class FXMLController implements Initializable {
             @Override
             public TableCell call(final TableColumn<String, String> param) {
                 final TableCell<String, String> cell = new TableCell<String, String>() {
+                    // delete file
                     FontIcon plusIcon = new FontIcon("fa-minus");
-                    Button btn = new Button();
+                    Button btnDelete = new Button();
+
+                    Button btnStatus = new Button();
+                    private final HBox pane = new HBox(btnDelete, btnStatus);
 
                     @Override
                     public void updateItem(String item, boolean empty) {
@@ -207,22 +226,32 @@ public class FXMLController implements Initializable {
                             setText(null);
                         } else {
                             plusIcon.setIconSize(15);
-                            btn.setGraphic(plusIcon);
-                            btn.setStyle(
+                            failStatusIcon.setIconSize(15);
+                            signStatusIcon.setIconSize(15);
+
+                            btnDelete.setGraphic(plusIcon);
+                            btnStatus.setGraphic(failStatusIcon);
+
+                            btnDelete.setStyle(
                                     "-fx-background-color:none;"+
-                                            "-fx-border:none"
+                                            "-fx-border:none;"
                             );
-                            btn.setOnMouseEntered(e->{
+
+                            btnStatus.setStyle(btnDelete.getStyle() +
+                                    "visibility:hidden;");
+
+                            btnDelete.setOnMouseEntered(e->{
                                 plusIcon.setIconColor(Color.web("#ff5900",1.0));
                             });
-                            btn.setOnMouseExited(e -> {
+                            btnDelete.setOnMouseExited(e -> {
                                 plusIcon.setIconColor(Color.web("#000",1.0));
                             });
-                            btn.setOnAction(event -> {
+                            btnDelete.setOnAction(event -> {
                                 //Person person = getTableView().getItems().get(getIndex());
                                 listitems.remove(getTableView().getItems().get(getIndex())) ;
                             });
-                            setGraphic(btn);
+
+                            setGraphic(pane);
                             setText(null);
                         }
                     }

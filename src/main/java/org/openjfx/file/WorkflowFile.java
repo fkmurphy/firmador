@@ -37,7 +37,7 @@ public class WorkflowFile implements FileRepository {
         BackendConnection bk = BackendConnection.get();
 
         String dst = System.getProperty("java.io.tmpdir") + "/" +this.id+"_"+this.year+"_"+this.number+".pdf";
-        bk.downloadFile("documents/view/"+this.id, dst);
+        bk.downloadFile("/documents/view/"+this.id, dst);
 
         return dst;
     }

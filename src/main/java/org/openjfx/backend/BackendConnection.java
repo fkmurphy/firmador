@@ -6,10 +6,7 @@ import org.json.JSONObject;
 
 import java.io.*;
 import java.net.*;
-import java.net.http.HttpClient;
-import java.net.http.HttpHeaders;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
+import java.net.http.*;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.charset.StandardCharsets;
@@ -54,19 +51,20 @@ public class BackendConnection {
      */
     public HttpResponse<String> getRequest(String documents)
     {
-        System.out.println("LA URL "+this.url+documents + " el token "+this.token);
-
         HttpRequest request = HttpRequest.newBuilder()
                 .GET()
                 .uri(URI.create(this.url+documents))
                 .setHeader("Content-Type","application/json")
                 .setHeader("Authorization",this.token)
+                .timeout(Duration.ofSeconds(5))
                 .build();
         HttpResponse<String> response = null;
 
         try {
             response = this.client.send(request, HttpResponse.BodyHandlers.ofString());
             return response;
+        } catch (HttpConnectTimeoutException e) {
+            //e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         } catch (InterruptedException e) {
@@ -89,7 +87,7 @@ public class BackendConnection {
             // TODO: 25/9/20   mensajes
             e.printStackTrace();
         } catch (IOException e) {
-            // TODO: mensajes
+            // TODO: 25/9/20 mensajes
             e.printStackTrace();
         }
     }
@@ -107,7 +105,7 @@ public class BackendConnection {
             data.put("ts", System.currentTimeMillis());
 
             HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(this.url+"documents/upload"))
+                    .uri(URI.create(this.url+"/documents/upload"))
                     .POST(  ofMimeMultipartData(data, boundary))
                     .setHeader("Content-Type","multipart/form-data; boundary="+boundary)
                     .setHeader("Accept","application/json")
