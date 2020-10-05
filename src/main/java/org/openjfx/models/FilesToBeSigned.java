@@ -27,6 +27,8 @@ public class FilesToBeSigned {
 
     public String getRepresentativePath() { return file.representativeName(); }
 
+    public String getDescriptionFile() { return file.getDescription(); }
+
     public CheckBox getChecked(){
         return this.checked;
     }

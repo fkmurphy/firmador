@@ -14,17 +14,27 @@ import java.nio.file.Files;
 
 public class WorkflowFile implements FileRepository {
     int id, year, type, number;
+    String description;
+
+    public WorkflowFile(int id, int year, int type, int number, String description) {
+        this.id = id;
+        this.year = year;
+        this.type = type;
+        this.number = number;
+        this.description = description;
+    }
 
     public WorkflowFile(int id, int year, int type, int number) {
         this.id = id;
         this.year = year;
         this.type = type;
         this.number = number;
+        this.description = "";
     }
 
     @Override
     public String getPath() {
-        BackendConnection bk = BackendConnection.get("");
+        BackendConnection bk = BackendConnection.get();
 
         String dst = System.getProperty("java.io.tmpdir") + "/" +this.id+"_"+this.year+"_"+this.number+".pdf";
         bk.downloadFile("documents/view/"+this.id, dst);
@@ -34,9 +44,11 @@ public class WorkflowFile implements FileRepository {
 
     @Override
     public String representativeName() {
-        return "un id: "+this.id;
+        return "N°: "+this.number + ", Tipo: " + this.type + " Año: "+ this.year;
     }
 
+    @Override
+    public String getDescription() { return this.description; }
 
     @Override
     public Boolean sign(Token token) {
@@ -44,14 +56,11 @@ public class WorkflowFile implements FileRepository {
         String dstFilename = PathHelper.generateDestionationPath(srcPath);
         if (dstFilename != null && dstFilename != ""){
             token.sign(srcPath, dstFilename);
-            BackendConnection.get("").sendFile(dstFilename,this.id);
+            BackendConnection.get().sendFile(dstFilename,this.id);
             return true;
         } else {
             return false;
         }
     }
-    //year
-    //type
-    //number
-    //id
+
 }
