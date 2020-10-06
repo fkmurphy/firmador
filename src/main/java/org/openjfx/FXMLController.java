@@ -21,6 +21,8 @@ public class FXMLController implements Initializable {
 }
 */
 
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -51,6 +53,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.net.http.HttpResponse;
+import java.nio.Buffer;
 import java.nio.file.Files;
 import java.util.Iterator;
 import java.util.Map;
@@ -65,14 +68,12 @@ public class FXMLController implements Initializable {
     /**
      * Buttons
      */
+
     @FXML
     private Button btn_select_file;
     @FXML
     private Button btn_firmar;
 
-    // status file
-    FontIcon failStatusIcon = new FontIcon("fa-close");
-    FontIcon signStatusIcon = new FontIcon("fa-check");
 
     /**
      * Table and Columns
@@ -84,9 +85,9 @@ public class FXMLController implements Initializable {
     @FXML
     private TableColumn<FilesToBeSigned, String> tb_path_file;
     @FXML
-    private TableColumn<FilesToBeSigned,Button> tb_button_info;
-    @FXML
     private TableColumn<FilesToBeSigned, String> tb_description;
+    @FXML
+    private TableColumn<FilesToBeSigned,Button> tb_status_sign;
 
     GemaltoToken token = null;
 
@@ -99,7 +100,14 @@ public class FXMLController implements Initializable {
 
     public void setBackendMap(Map<String, String> map) {
         this.mapArgument = map;
-        processDocumentsBackend();
+
+        Thread backend =new Thread() {
+            public void run() {
+                processDocumentsBackend();
+
+            }
+        };
+        backend.start();
     }
 
     @FXML
@@ -109,16 +117,18 @@ public class FXMLController implements Initializable {
         Iterator<FilesToBeSigned> listFilesSrc = listitems.iterator();
         FilesToBeSigned fileSrc;
         String dstStr, srcStr, extension;
-        int count = 0;
-        while(listFilesSrc.hasNext()){
 
+        while(listFilesSrc.hasNext()){
             fileSrc = listFilesSrc.next();
             if(fileSrc.getChecked().isSelected()){
-                fileSrc.getFile().sign(token);
-                System.out.println(table_files.getColumns().indexOf("Action"));
+                try {
+                    fileSrc.getFile().sign(token);
+                    fileSrc.setStatus("signed");
+                    fileSrc.setChecked(false);
+                } catch (Exception e) {
+                    fileSrc.setStatus("fail");
+                }
             }
-            count++;
-
         }
 
         //String src = HelloFX.class.getClassLoader().getResource("uno.pdf").getFile();
@@ -158,6 +168,7 @@ public class FXMLController implements Initializable {
         //list_files.setItems(listitems);
         tb_check_file.setCellValueFactory(new PropertyValueFactory<FilesToBeSigned, CheckBox>("checked"));
         tb_path_file.setCellValueFactory(cd -> new SimpleStringProperty(cd.getValue().getRepresentativePath()));
+        tb_status_sign.setCellValueFactory(new PropertyValueFactory<FilesToBeSigned,Button>("signed"));
         table_files.setItems(listitems);
         tb_description.setCellValueFactory(cd -> new SimpleStringProperty(cd.getValue().getDescriptionFile()));
         actionColumn();
@@ -211,12 +222,8 @@ public class FXMLController implements Initializable {
             @Override
             public TableCell call(final TableColumn<String, String> param) {
                 final TableCell<String, String> cell = new TableCell<String, String>() {
-                    // delete file
                     FontIcon plusIcon = new FontIcon("fa-minus");
                     Button btnDelete = new Button();
-
-                    Button btnStatus = new Button();
-                    private final HBox pane = new HBox(btnDelete, btnStatus);
 
                     @Override
                     public void updateItem(String item, boolean empty) {
@@ -226,20 +233,11 @@ public class FXMLController implements Initializable {
                             setText(null);
                         } else {
                             plusIcon.setIconSize(15);
-                            failStatusIcon.setIconSize(15);
-                            signStatusIcon.setIconSize(15);
-
                             btnDelete.setGraphic(plusIcon);
-                            btnStatus.setGraphic(failStatusIcon);
-
                             btnDelete.setStyle(
                                     "-fx-background-color:none;"+
-                                            "-fx-border:none;"
+                                            "-fx-border:none"
                             );
-
-                            btnStatus.setStyle(btnDelete.getStyle() +
-                                    "visibility:hidden;");
-
                             btnDelete.setOnMouseEntered(e->{
                                 plusIcon.setIconColor(Color.web("#ff5900",1.0));
                             });
@@ -250,8 +248,7 @@ public class FXMLController implements Initializable {
                                 //Person person = getTableView().getItems().get(getIndex());
                                 listitems.remove(getTableView().getItems().get(getIndex())) ;
                             });
-
-                            setGraphic(pane);
+                            setGraphic(btnDelete);
                             setText(null);
                         }
                     }
@@ -265,6 +262,5 @@ public class FXMLController implements Initializable {
         table_files.getColumns().addAll(actionCol);
 
     }
-
 
 }
