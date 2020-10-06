@@ -101,12 +101,7 @@ public class FXMLController implements Initializable {
     public void setBackendMap(Map<String, String> map) {
         this.mapArgument = map;
 
-        Thread backend =new Thread() {
-            public void run() {
-                processDocumentsBackend();
-
-            }
-        };
+        Thread backend = new Thread(() -> processDocumentsBackend());
         backend.start();
     }
 
@@ -142,7 +137,7 @@ public class FXMLController implements Initializable {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Elegir un archivo");
         File fileSelected = fileChooser.showOpenDialog(new Stage());
-        FilesToBeSigned newFile = new FilesToBeSigned((FileRepository) new LocalPDF(fileSelected.getAbsolutePath()),true);
+        FilesToBeSigned newFile = new FilesToBeSigned(new LocalPDF(fileSelected.getAbsolutePath()),true);
         if(!listitems.contains(newFile))
             listitems.add(newFile);
         //listitems.add(fileSelected.getAbsolutePath());
@@ -184,7 +179,7 @@ public class FXMLController implements Initializable {
         if (!mapArgument.containsKey("api_url"))
             return;
         BackendConnection bk =  BackendConnection.get(mapArgument);
-        HttpResponse<String> response = bk.getRequest("/documents/");
+        HttpResponse<String> response = bk.getRequest("/documents/pending/");
 
         // TODO: 5/10/20 throwable
         if (response == null || response.statusCode() != 200)
