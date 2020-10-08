@@ -91,7 +91,6 @@ public class FXMLController implements Initializable {
 
     public void setBackendMap(Map<String, String> map) {
         this.mapArgument = map;
-
         Thread backend = new Thread(this::processDocumentsBackend);
         backend.start();
     }
@@ -166,17 +165,20 @@ public class FXMLController implements Initializable {
     }
 
     private void processDocumentsBackend() {
+        System.out.println("ejecuto hilo");
         if (!mapArgument.containsKey("api_url"))
             return;
         BackendConnection bk =  BackendConnection.get(mapArgument);
         HttpResponse<String> response = bk.getRequest("/documents/pending/");
+
+        System.out.println("la respuesta"+response.body());
+        System.out.println(response.statusCode());
 
         // TODO: 5/10/20 throwable
         if (response == null || response.statusCode() != 200)
             return;
 
         JSONArray array = new JSONArray(response.body());
-
         int id,type,number, year;
         String description;
         JSONObject json;
