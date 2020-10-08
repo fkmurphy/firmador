@@ -97,8 +97,10 @@ public class FXMLController implements Initializable {
 
     @FXML
     void firmarButton() {
-        if(token == null)
+        if(token == null){
             token = new GemaltoToken(password_token.getText());
+        }
+
         Iterator<FilesToBeSigned> listFilesSrc = listitems.iterator();
         FilesToBeSigned fileSrc;
 
@@ -136,7 +138,6 @@ public class FXMLController implements Initializable {
 
     @FXML
     void btnTokenInfoAction() {
-        System.out.println("PPrueba boton");
         try {
             Parent root  = FXMLLoader.load(getClass().getClassLoader().getResource("token_info.fxml"));
             Stage stage = (Stage) btn_select_file.getScene().getWindow();
@@ -165,14 +166,10 @@ public class FXMLController implements Initializable {
     }
 
     private void processDocumentsBackend() {
-        System.out.println("ejecuto hilo");
         if (!mapArgument.containsKey("api_url"))
             return;
         BackendConnection bk =  BackendConnection.get(mapArgument);
         HttpResponse<String> response = bk.getRequest("/documents/pending/");
-
-        System.out.println("la respuesta"+response.body());
-        System.out.println(response.statusCode());
 
         // TODO: 5/10/20 throwable
         if (response == null || response.statusCode() != 200)

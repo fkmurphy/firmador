@@ -5,6 +5,8 @@ module org.openjfx {
     requires org.kordamp.ikonli.javafx;
     requires org.kordamp.ikonli.fontawesome;
     requires org.kordamp.ikonli.fontawesome5;
+    requires jdk.crypto.cryptoki;
+    requires bcprov.jdk15on;
     requires org.kordamp.iconli.core;
     requires itextpdf;
     requires java.net.http;

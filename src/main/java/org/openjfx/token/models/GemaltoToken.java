@@ -26,7 +26,9 @@ public class GemaltoToken implements Token {
     public GemaltoToken(String pwd){
         this.driverPath = "";
         Provider prototype = Security.getProvider("SunPKCS11");
-        this.provider = prototype.configure(getConfig());
+        this.provider = prototype.configure("--name=eToken\n" +
+                "library=/lib64/libeToken.so\n" +
+                "slot=0");
         this.pwd = pwd.toCharArray();
         Security.addProvider(provider);
     }
