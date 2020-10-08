@@ -15,10 +15,7 @@ import java.security.*;
 import java.security.cert.Certificate;
 import java.security.cert.*;
 import java.time.LocalDateTime;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 
 public class GemaltoToken implements Token {
     private static final long TICKS_POR_DIA = 1000 * 60 * 60 * 24;
@@ -40,10 +37,6 @@ public class GemaltoToken implements Token {
             return ks;
         } catch (KeyStoreException e) {
             e.printStackTrace();
-        } catch (CertificateException e) {
-            e.printStackTrace();
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
         } catch (IOException e) {
             System.out.println("Una excepción con el token");
             //e.printStackTrace();
@@ -57,18 +50,28 @@ public class GemaltoToken implements Token {
         X509Certificate cert = null;
         try {
             KeyStore ks = getKeystoreInstance();
-            String alias = ks.aliases().nextElement();
+            if(ks == null)
+                throw new NullPointerException();
+            Enumeration<String> aliases = ks.aliases();
+            if(aliases != null){
+                String alias = aliases.nextElement();
+                cert = (X509Certificate) ks.getCertificate(alias);
+            }
+            // TODO: 6/10/20 exception if null
             //get Cert
-            cert = (X509Certificate) ks.getCertificate(alias);
+
         } catch (KeyStoreException e) {
             e.printStackTrace();
+        } catch (NullPointerException p) {
+            System.out.println("null");
+            p.printStackTrace();
         }
         return cert;
     }
 
     @Override
     public Map<String,String> getInfo() {
-        Map<String,String> map = new HashMap<String,String>();
+        Map<String,String> map = new HashMap<>();
         X509Certificate cert = getCert();
         map.put("issuer",cert.getIssuerDN().toString());
         map.put("not_before",cert.getNotBefore().toString());
@@ -130,26 +133,42 @@ public class GemaltoToken implements Token {
     public void sign(String src, String dst){
         try {
             KeyStore ks = getKeystoreInstance();
-            String alias = ks.aliases().nextElement();
-            PrivateKey privKey = (PrivateKey) ks.getKey(alias, pwd);
-            Certificate[] chain = ks.getCertificateChain(alias);
-            if(signature == null) {
+            if(ks == null)
+                throw new NullPointerException();
+            Enumeration<String> aliases = ks.aliases();
+            PrivateKey privKey = null;
+            Certificate[] chain = null;
+            if (aliases != null){
+                String alias = aliases.nextElement();
+                privKey = (PrivateKey) ks.getKey(alias, pwd);
+                chain = ks.getCertificateChain(alias);
+            }
 
+            if(signature == null && privKey != null) {
                 signature =
                         new PrivateKeySignature(privKey, DigestAlgorithms.SHA256, ks.getProvider().getName());
             }
+
+            // TODO: 6/10/20 excepcion por null
             processSign(src, dst, chain,privKey, DigestAlgorithms.SHA256,
                     getProvider().getName(), MakeSignature.CryptoStandard.CMS,
                     "-", "Viedma, Río Negro, Argentina");
-        } catch (IOException | KeyStoreException e) {
+        } catch (IOException e) {
+            e.printStackTrace();
+        }catch (KeyStoreException e) {
+            System.out.println("Error keystore");
             e.printStackTrace();
         } catch (UnrecoverableKeyException e) {
+            System.out.println("Error UnrecoverableKey");
             e.printStackTrace();
         } catch (NoSuchAlgorithmException e) {
+            System.out.println("Error nosuch algorith");
             e.printStackTrace();
         } catch (DocumentException e) {
+            System.out.println("Error documentexceptin");
             e.printStackTrace();
         } catch (GeneralSecurityException e) {
+            System.out.println("Error general security");
             e.printStackTrace();
         }
 
@@ -178,7 +197,7 @@ public class GemaltoToken implements Token {
         // 40 = 1cm
         // 40 init x | 40 init y (1cmX x 1cmY)
         // 40+120 | 40 + 40
-        appearance.setVisibleSignature(new Rectangle(40, 40, 40+120, 40+40), lastPage, "sig"+ Integer.toString((new Random()).nextInt(25)));
+        appearance.setVisibleSignature(new Rectangle(40, 40, 40+120, 40+40), lastPage, "sig"+ (new Random()).nextInt(25));
         // Creating the signature
         ExternalDigest digest = new BouncyCastleDigest();
 

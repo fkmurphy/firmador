@@ -21,27 +21,23 @@ public class FXMLController implements Initializable {
 }
 */
 
-import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.value.ObservableValue;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.layout.HBox;
+import javafx.scene.control.*;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.paint.Color;
+import javafx.stage.FileChooser;
+import javafx.stage.Stage;
 import javafx.util.Callback;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.kordamp.ikonli.javafx.FontIcon;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
-import javafx.event.ActionEvent;
-import javafx.fxml.FXML;
-import javafx.fxml.Initializable;
-import javafx.scene.control.*;
-import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.stage.FileChooser;
-import javafx.stage.Stage;
 import org.openjfx.backend.BackendConnection;
 import org.openjfx.file.FileRepository;
 import org.openjfx.file.LocalPDF;
@@ -53,8 +49,6 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.net.http.HttpResponse;
-import java.nio.Buffer;
-import java.nio.file.Files;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.ResourceBundle;
@@ -62,17 +56,14 @@ import java.util.ResourceBundle;
 public class FXMLController implements Initializable {
     @FXML
     private PasswordField password_token;
-    @FXML
-    private MenuItem mi_token;
 
     /**
      * Buttons
      */
-
     @FXML
     private Button btn_select_file;
-    @FXML
-    private Button btn_firmar;
+    //@FXML
+    //private Button btn_firmar;
 
 
     /**
@@ -94,29 +85,22 @@ public class FXMLController implements Initializable {
     Map<String,String> mapArgument;
 
     @FXML
-    private ObservableList<FilesToBeSigned> listitems = FXCollections.observableArrayList(
+    private final ObservableList<FilesToBeSigned> listitems = FXCollections.observableArrayList(
             //        new FilesToBeSigned(new LocalPDF("qweqweqweadasadassd"),true)
     );
 
     public void setBackendMap(Map<String, String> map) {
         this.mapArgument = map;
-
-        Thread backend =new Thread() {
-            public void run() {
-                processDocumentsBackend();
-
-            }
-        };
+        Thread backend = new Thread(this::processDocumentsBackend);
         backend.start();
     }
 
     @FXML
-    void firmarButton(ActionEvent event) {
+    void firmarButton() {
         if(token == null)
             token = new GemaltoToken(password_token.getText());
         Iterator<FilesToBeSigned> listFilesSrc = listitems.iterator();
         FilesToBeSigned fileSrc;
-        String dstStr, srcStr, extension;
 
         while(listFilesSrc.hasNext()){
             fileSrc = listFilesSrc.next();
@@ -138,11 +122,11 @@ public class FXMLController implements Initializable {
 
 
     @FXML
-    void selectFile(ActionEvent event){
+    void selectFile(){
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Elegir un archivo");
         File fileSelected = fileChooser.showOpenDialog(new Stage());
-        FilesToBeSigned newFile = new FilesToBeSigned((FileRepository) new LocalPDF(fileSelected.getAbsolutePath()),true);
+        FilesToBeSigned newFile = new FilesToBeSigned(new LocalPDF(fileSelected.getAbsolutePath()),true);
         if(!listitems.contains(newFile))
             listitems.add(newFile);
         //listitems.add(fileSelected.getAbsolutePath());
@@ -151,7 +135,7 @@ public class FXMLController implements Initializable {
     }
 
     @FXML
-    void btnTokenInfoAction(ActionEvent event) {
+    void btnTokenInfoAction() {
         System.out.println("PPrueba boton");
         try {
             Parent root  = FXMLLoader.load(getClass().getClassLoader().getResource("token_info.fxml"));
@@ -181,22 +165,24 @@ public class FXMLController implements Initializable {
     }
 
     private void processDocumentsBackend() {
+        System.out.println("ejecuto hilo");
         if (!mapArgument.containsKey("api_url"))
             return;
         BackendConnection bk =  BackendConnection.get(mapArgument);
-        HttpResponse<String> response = bk.getRequest("/documents/");
+        HttpResponse<String> response = bk.getRequest("/documents/pending/");
+
+        System.out.println("la respuesta"+response.body());
+        System.out.println(response.statusCode());
 
         // TODO: 5/10/20 throwable
         if (response == null || response.statusCode() != 200)
             return;
 
         JSONArray array = new JSONArray(response.body());
-
         int id,type,number, year;
         String description;
-        byte[] buffer = new byte[1024];
         JSONObject json;
-        WorkflowFile ll = null;
+        WorkflowFile ll;
         for (int i =0;i<array.length();i++){
             json = (JSONObject)array.get(i);
             id =  Integer.parseInt(json.get("id").toString());
@@ -205,12 +191,8 @@ public class FXMLController implements Initializable {
             number = Integer.parseInt(json.get("number").toString());
             description = json.get("theme").toString();
             ll = new WorkflowFile(id, year, type, number, description);
-            listitems.add( new FilesToBeSigned((FileRepository) ll));
+            listitems.add( new FilesToBeSigned(ll));
         }
-
-    }
-
-    private void actionButtonDelete(){
 
     }
 
@@ -222,8 +204,8 @@ public class FXMLController implements Initializable {
             @Override
             public TableCell call(final TableColumn<String, String> param) {
                 final TableCell<String, String> cell = new TableCell<String, String>() {
-                    FontIcon plusIcon = new FontIcon("fa-minus");
-                    Button btnDelete = new Button();
+                    final FontIcon plusIcon = new FontIcon("fa-minus");
+                    final Button btnDelete = new Button();
 
                     @Override
                     public void updateItem(String item, boolean empty) {
