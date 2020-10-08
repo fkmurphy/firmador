@@ -7,12 +7,12 @@
    <children>
       <MenuBar>
          <menus>
-            <Menu mnemonicParsing="false" text="About">
+            <Menu mnemonicParsing="false" text="Sobre">
                <items>
                   <MenuItem fx:id="mi_token" mnemonicParsing="false" onAction="#btnTokenInfoAction" text="TokenInfo" />
                </items>
             </Menu>
-            <Menu mnemonicParsing="false" text="Help">
+            <Menu mnemonicParsing="false" text="Ayuda">
                <items>
                   <MenuItem mnemonicParsing="false" text="Close" />
                </items>
