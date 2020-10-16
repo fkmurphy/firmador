@@ -13,6 +13,7 @@ module org.openjfx {
     requires org.json;
     requires jcifs;
 
-    opens org.openjfx.models to javafx.base;
+    opens org.openjfx.Main.models to javafx.base;
+    opens org.openjfx.Main;
     opens org.openjfx;
 }

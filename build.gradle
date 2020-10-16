@@ -1,9 +1,9 @@
 plugins {
   id 'application'
-    id 'java'
+  id 'java'
   id 'org.openjfx.javafxplugin' version '0.0.8'
-    id 'org.beryx.jlink'               version '2.15.1'
-    id 'com.github.ben-manes.versions' version '0.23.0'
+  id 'org.beryx.jlink'               version '2.15.1'
+  id 'com.github.ben-manes.versions' version '0.23.0'
 }
 
 repositories {
@@ -29,17 +29,13 @@ prop.load(project.rootProject.file(PROPERTIES_FILE).newDataInputStream())
 
 ext {
     appName = "HelloFX"
-    appLauncher = "fxapp"
-    appPackaging = "org.openjfx"
-    appModuleName = "org.openjfx"
-    appMainClass = "org.openjfx.MainApp"
+    appPackaging = "org.openjfx.Main"
 }
 
 run {
     args = [
             prop.getProperty("MIME_TYPE")+"://"+prop.getProperty("BACKEND_IP")+":"+prop.getProperty("BACKEND_PORT")+prop.getProperty("BACKEND_ENDPOINT")+"?token=" + prop.getProperty("TOKEN")
     ]
-
 }
 
 task dist {
@@ -61,7 +57,7 @@ javafx {
 jlink {
     imageZip = project.file("${buildDir}/distributions/${appPackaging}-${javafx.platform.classifier}.zip")
     launcher {
-        name = 'hellofx'
+        name = 'firmador'
     }
 
     options = ['--strip-debug', '--compress', '2',
@@ -69,17 +65,7 @@ jlink {
                '--output', "${appPackaging}"
     ]
 }
-/*jar {
-    manifest {
-        attributes(
-                "Automatic-Module-Name": "jboss.jaxb.api.2.3.spec"
-        )
-    }
-    from ('./src/main/java') {
-        include 'META-INF/keycloak.json'
-    }
 
-}*/
 allprojects {
     compileJava {
         options.forkOptions.javaHome = file(System.properties['java.home'])
