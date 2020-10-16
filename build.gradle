@@ -35,24 +35,18 @@ ext {
     appMainClass = "org.openjfx.MainApp"
 }
 
-
-
-
-
-
 run {
     args = [
-            "firmador://192.168.42.25:8000/api?token=" + prop.getProperty("TOKEN")
+            prop.getProperty("MIME_TYPE")+"://"+prop.getProperty("BACKEND_IP")+":"+prop.getProperty("BACKEND_PORT")+prop.getProperty("BACKEND_ENDPOINT")+"?token=" + prop.getProperty("TOKEN")
     ]
 
 }
-
-
 
 task dist {
     dependsOn clean, jlinkZip
     description "Calls clean and then jlinkZip [default]"
 }
+
 defaultTasks 'dist'
 javafx {
     version = '13'

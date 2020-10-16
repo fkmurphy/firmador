@@ -37,9 +37,7 @@ public class HelloFX extends Application {
     }
 
     public static void main(String[] args) {
-
         launch(args);
-
     }
 
     private static Map<String,String> processArgs (List<String> args) {

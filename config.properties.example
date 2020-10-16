@@ -1,2 +1,5 @@
 TOKEN=eyJasdasdUzI1NxxxOiAiSldxxxxxoxn-aO-7xxxxwW9HYcMZEIoXseDYc7r6Vrxxx
-
+BACKEND_IP=192.168.42.25
+BACKEND_PORT=8000
+BACKEND_ENDPOINT=/api
+MIME_TYPE=firmador
