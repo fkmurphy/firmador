@@ -6,9 +6,8 @@ import com.itextpdf.text.pdf.PdfReader;
 import com.itextpdf.text.pdf.PdfSignatureAppearance;
 import com.itextpdf.text.pdf.PdfStamper;
 import com.itextpdf.text.pdf.security.*;
-import org.openjfx.HelloFX;
+import org.openjfx.Main.Start;
 
-import java.io.ByteArrayInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.security.*;
@@ -95,7 +94,7 @@ public class GemaltoToken implements Token {
     }
 
     protected String getConfig(){
-        return HelloFX.class.getResource("pkcs11.cfg").getFile();
+        return Start.class.getResource("org/openjfx/pkcs11.cfg").getFile();
     }
 
     private long expireCert(X509Certificate cert)
