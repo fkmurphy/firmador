@@ -6,15 +6,17 @@ import org.openjfx.token.models.Token;
 
 
 public class WorkflowFile implements FileRepository {
-    int id, year, type, number;
+    int id, year, type, number, posX, posY;
     String description;
 
-    public WorkflowFile(int id, int year, int type, int number, String description) {
+    public WorkflowFile(int id, int year, int type, int number, String description, int posX, int posY) {
         this.id = id;
         this.year = year;
         this.type = type;
         this.number = number;
         this.description = description;
+        this.posX = posX;
+        this.posY = posY;
     }
 
     public WorkflowFile(int id, int year, int type, int number) {
@@ -48,7 +50,7 @@ public class WorkflowFile implements FileRepository {
         String srcPath = getPath();
         String dstFilename = PathHelper.generateDestionationPath(srcPath);
         if (dstFilename != null && dstFilename != ""){
-            token.sign(srcPath, dstFilename);
+            token.signWithPositionStamper(srcPath, dstFilename, posX, posY);
             BackendConnection.get().sendFile(dstFilename,this.id);
             return true;
         } else {

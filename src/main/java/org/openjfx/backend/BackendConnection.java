@@ -63,6 +63,7 @@ public class BackendConnection {
 
         try {
             response = this.client.send(request, HttpResponse.BodyHandlers.ofString());
+            System.out.println(response.body());
             return response;
         } catch (HttpConnectTimeoutException e) {
             //e.printStackTrace();

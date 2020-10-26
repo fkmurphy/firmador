@@ -8,4 +8,5 @@ public interface Token {
     public String getDriverPath();
     public Provider getProvider();
     public void sign(String src, String dst);
+    public void signWithPositionStamper(String src, String dst, int posX, int posY);
 }
