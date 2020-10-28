@@ -132,6 +132,9 @@ public class GemaltoToken implements Token {
         return passwordLine;
     }*/
     public void sign(String src, String dst){
+        this.signWithPositionStamper(src,dst,40,40); // Dejo como estaba todo antes
+    }
+    public void signWithPositionStamper(String src, String dst, int posX,int posY){
         try {
             KeyStore ks = getKeystoreInstance();
             if(ks == null)
@@ -153,7 +156,7 @@ public class GemaltoToken implements Token {
             // TODO: 6/10/20 excepcion por null
             processSign(src, dst, chain,privKey, DigestAlgorithms.SHA256,
                     getProvider().getName(), MakeSignature.CryptoStandard.CMS,
-                    "-", "Viedma, Río Negro, Argentina");
+                    "-", "Viedma, Río Negro, Argentina", posX, posY);
         } catch (IOException e) {
             e.printStackTrace();
         }catch (KeyStoreException e) {
@@ -177,7 +180,7 @@ public class GemaltoToken implements Token {
 
     public void processSign(String src, String dest,
                             Certificate[] chain, PrivateKey pk, String digestAlgorithm, String provider,
-                            MakeSignature.CryptoStandard subfilter, String reason, String location)
+                            MakeSignature.CryptoStandard subfilter, String reason, String location, int posX, int posY)
             throws GeneralSecurityException, IOException, DocumentException {
 
         // Creating the reader and the stamper
@@ -198,7 +201,7 @@ public class GemaltoToken implements Token {
         // 40 = 1cm
         // 40 init x | 40 init y (1cmX x 1cmY)
         // 40+120 | 40 + 40
-        appearance.setVisibleSignature(new Rectangle(40, 40, 40+120, 40+40), lastPage, "sig"+ (new Random()).nextInt(25));
+        appearance.setVisibleSignature(new Rectangle(posX, posY, posX+120, posY+40), lastPage, "sig"+ (new Random()).nextInt(25));
         // Creating the signature
         ExternalDigest digest = new BouncyCastleDigest();
 

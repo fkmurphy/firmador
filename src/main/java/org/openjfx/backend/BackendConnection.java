@@ -40,6 +40,7 @@ public class BackendConnection {
                     .connectTimeout(Duration.ofSeconds(20))
                     .build();
 
+
             token = "Bearer " +  params.get("token");
             url = "http://" + params.get("api_url");
     }
@@ -62,6 +63,7 @@ public class BackendConnection {
 
         try {
             response = this.client.send(request, HttpResponse.BodyHandlers.ofString());
+            System.out.println(response.body());
             return response;
         } catch (HttpConnectTimeoutException e) {
             //e.printStackTrace();

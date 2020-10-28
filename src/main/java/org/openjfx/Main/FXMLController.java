@@ -175,7 +175,7 @@ public class FXMLController implements Initializable {
             return;
 
         JSONArray array = new JSONArray(response.body());
-        int id,type,number, year;
+        int id,type,number, year, posX, posY;
         String description;
         JSONObject json;
         WorkflowFile ll;
@@ -186,7 +186,9 @@ public class FXMLController implements Initializable {
             type = Integer.parseInt(json.get("type").toString());
             number = Integer.parseInt(json.get("number").toString());
             description = json.get("theme").toString();
-            ll = new WorkflowFile(id, year, type, number, description);
+            posX = Integer.parseInt(json.get("posX").toString());
+            posY = Integer.parseInt(json.get("posY").toString());
+            ll = new WorkflowFile(id, year, type, number, description, posX, posY);
             listitems.add( new FilesToBeSigned(ll));
         }
 
