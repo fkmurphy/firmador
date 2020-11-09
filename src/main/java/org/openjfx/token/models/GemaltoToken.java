@@ -194,11 +194,11 @@ public class GemaltoToken implements Token {
         appearance.setReason(reason);
         appearance.setLocation(location);
         //permitir firmado
-        int certLevel = PdfSignatureAppearance.CERTIFIED_FORM_FILLING;
+        int certLevel = PdfSignatureAppearance.NOT_CERTIFIED;
 
-        if (reader.getAcroFields().getSignatureNames().size() > 0) {
+        /*if (reader.getAcroFields().getSignatureNames().size() > 0) {
             certLevel = PdfSignatureAppearance.NOT_CERTIFIED;
-        }
+        }*/
         appearance.setCertificationLevel(certLevel);
 
         System.out.println(LocalDateTime.now().toString());
