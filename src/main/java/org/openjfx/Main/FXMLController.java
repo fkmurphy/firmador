@@ -21,6 +21,8 @@ public class FXMLController implements Initializable {
 }
 */
 
+import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
+import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -32,6 +34,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.paint.Color;
+import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.util.Callback;
@@ -202,7 +205,9 @@ public class FXMLController implements Initializable {
             @Override
             public TableCell call(final TableColumn<String, String> param) {
                 final TableCell<String, String> cell = new TableCell<String, String>() {
-                    final FontIcon plusIcon = new FontIcon("fa-minus");
+                    Text plusIcon = FontAwesomeIconFactory.get().createIcon(FontAwesomeIcon.MINUS,"15");
+
+                    //final FontIcon plusIcon = new FontIcon("fa-minus");
                     final Button btnDelete = new Button();
 
                     @Override
@@ -212,17 +217,17 @@ public class FXMLController implements Initializable {
                             setGraphic(null);
                             setText(null);
                         } else {
-                            plusIcon.setIconSize(15);
+                            //plusIcon.setIconSize(15);
                             btnDelete.setGraphic(plusIcon);
                             btnDelete.setStyle(
                                     "-fx-background-color:none;"+
                                             "-fx-border:none"
                             );
                             btnDelete.setOnMouseEntered(e->{
-                                plusIcon.setIconColor(Color.web("#ff5900",1.0));
+                                //plusIcon.setIconColor(Color.web("#ff5900",1.0));
                             });
                             btnDelete.setOnMouseExited(e -> {
-                                plusIcon.setIconColor(Color.web("#000",1.0));
+                                //plusIcon.setIconColor(Color.web("#000",1.0));
                             });
                             btnDelete.setOnAction(event -> {
                                 //Person person = getTableView().getItems().get(getIndex());

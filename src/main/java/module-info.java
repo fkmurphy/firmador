@@ -12,6 +12,7 @@ module org.openjfx {
     requires java.net.http;
     requires org.json;
     requires jcifs;
+    requires de.jensd.fx.glyphs.fontawesome;
 
     opens org.openjfx.Main.models to javafx.base;
     opens org.openjfx.Main;
