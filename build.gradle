@@ -70,7 +70,12 @@ jlink {
     ]
 }
 
-
+compileJava {
+    options.encoding = 'UTF-8'
+}
+compileTestJava {
+    options.encoding = 'UTF-8'
+}
 
 jar {
     targetCompatibility = 11
