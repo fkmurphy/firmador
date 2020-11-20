@@ -3,7 +3,6 @@ package org.openjfx.Main.models;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.text.Text;
-import org.kordamp.ikonli.javafx.FontIcon;
 import org.openjfx.Main.file.FileRepository;
 
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;

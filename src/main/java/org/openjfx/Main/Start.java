@@ -29,6 +29,7 @@ public class Start extends Application {
         Parent root = (Parent) loader.load();
         FXMLController controller = loader.getController();
         controller.setBackendMap(map);
+        controller.setGetHostController(getHostServices());
 
         Scene scene = new Scene(root);
         scene.getStylesheets().add(getClass().getResource("styles.css").toExternalForm());
