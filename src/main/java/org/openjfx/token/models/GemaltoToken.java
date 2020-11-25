@@ -8,6 +8,7 @@ import com.itextpdf.text.pdf.PdfStamper;
 import com.itextpdf.text.pdf.security.*;
 import org.openjfx.Main.Start;
 
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.security.*;
@@ -25,12 +26,50 @@ public class GemaltoToken implements Token {
     public GemaltoToken(String pwd){
         this.driverPath = "";
         Provider prototype = Security.getProvider("SunPKCS11");
-        this.provider = prototype.configure("--name=eToken\n" +
+        this.provider = this.configureProvider(prototype);
+        /*this.provider = prototype.configure("--name=eToken\n" +
                 "library=/lib64/libeToken.so\n" +
-                "slot=0");
+                "slot=0");*/
         this.pwd = pwd.toCharArray();
         Security.addProvider(provider);
     }
+
+    private Provider configureProvider(Provider prototype) {
+        ConfigureProvider providerBundle = new ConfigureProvider();
+        String type = "";
+        if (System.getProperty("os.name").toLowerCase().contains("linux") ||
+                System.getProperty("os.name").toLowerCase().contains("sunos") ||
+                System.getProperty("os.name").toLowerCase().contains("solaris")) {
+            type = "linux";
+        }
+        else if (System.getProperty("os.name").toLowerCase().contains("mac os x"))
+        {
+            type = "mac";
+        } else {
+            type = "windows";
+        }
+
+        ArrayList<String> configs = new ArrayList<String>();
+        ArrayList<LocalProvider> providers = providerBundle.getProviders(type);
+        for (int n = 0; n < providers.size(); n++) {
+            try {
+                File libraryFile = new File(providers.get(n).getLibrary());
+                //System.out.println("Path al archivo: " + libraryFile.getPath());
+                if (libraryFile.exists()) {
+                    //configs.add("--name=" + providers.get(n).getName() + "\nlibrary=" + libraryFile.getPath());
+                    return prototype.configure("--name=" + providers.get(n).getName() + "\nlibrary=" + libraryFile.getPath());
+
+                }
+
+            } catch (Exception e) {
+                e.printStackTrace();
+                System.out.println("cargarConfiguracionProviderToken error: " + e.getMessage());
+                //cargarMensajeDeError("", "cargarConfiguracionProviderToken", e);
+            }
+        }
+        return null;
+    }
+
     private KeyStore getKeystoreInstance(){
         try {
             KeyStore ks = KeyStore.getInstance("PKCS11", this.provider);
@@ -194,7 +233,12 @@ public class GemaltoToken implements Token {
         appearance.setReason(reason);
         appearance.setLocation(location);
         //permitir firmado
-        appearance.setCertificationLevel(PdfSignatureAppearance.CERTIFIED_FORM_FILLING);
+        int certLevel = PdfSignatureAppearance.NOT_CERTIFIED;
+
+        /*if (reader.getAcroFields().getSignatureNames().size() > 0) {
+            certLevel = PdfSignatureAppearance.NOT_CERTIFIED;
+        }*/
+        appearance.setCertificationLevel(certLevel);
 
         System.out.println(LocalDateTime.now().toString());
         int lastPage = reader.getNumberOfPages();

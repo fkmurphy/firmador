@@ -20,7 +20,12 @@ public class FXMLController implements Initializable {
     }
 }
 */
-
+import javafx.application.HostServices;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
+import javafx.scene.layout.HBox;
+import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
+import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -32,20 +37,19 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.paint.Color;
+import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.util.Callback;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.kordamp.ikonli.javafx.FontIcon;
 import org.openjfx.backend.BackendConnection;
 import org.openjfx.Main.file.LocalPDF;
 import org.openjfx.Main.file.WorkflowFile;
 import org.openjfx.Main.models.FilesToBeSigned;
 import org.openjfx.token.models.GemaltoToken;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.net.URL;
 import java.net.http.HttpResponse;
 import java.util.Iterator;
@@ -87,6 +91,7 @@ public class FXMLController implements Initializable {
     private final ObservableList<FilesToBeSigned> listitems = FXCollections.observableArrayList(
             //        new FilesToBeSigned(new LocalPDF("qweqweqweadasadassd"),true)
     );
+    private HostServices hostServices;
 
     public void setBackendMap(Map<String, String> map) {
         this.mapArgument = map;
@@ -107,9 +112,13 @@ public class FXMLController implements Initializable {
             fileSrc = listFilesSrc.next();
             if(fileSrc.getChecked().isSelected()){
                 try {
-                    fileSrc.getFile().sign(token);
-                    fileSrc.setStatus("signed");
+                    if  (!fileSrc.getFile().sign(token)) {
+                        fileSrc.setStatus("fail");
+                    } else {
+                        fileSrc.setStatus("signed");
+                    }
                     fileSrc.setChecked(false);
+
                 } catch (Exception e) {
                     fileSrc.setStatus("fail");
                 }
@@ -128,8 +137,9 @@ public class FXMLController implements Initializable {
         fileChooser.setTitle("Elegir un archivo");
         File fileSelected = fileChooser.showOpenDialog(new Stage());
         FilesToBeSigned newFile = new FilesToBeSigned(new LocalPDF(fileSelected.getAbsolutePath()),true);
-        if(!listitems.contains(newFile))
+        if(!listitems.contains(newFile)) {
             listitems.add(newFile);
+        }
         //listitems.add(fileSelected.getAbsolutePath());
         //list_files.refresh();
 
@@ -202,9 +212,12 @@ public class FXMLController implements Initializable {
             @Override
             public TableCell call(final TableColumn<String, String> param) {
                 final TableCell<String, String> cell = new TableCell<String, String>() {
-                    final FontIcon plusIcon = new FontIcon("fa-minus");
+                    Text plusIcon = FontAwesomeIconFactory.get().createIcon(FontAwesomeIcon.MINUS,"15");
+                    Text eyeIcon = FontAwesomeIconFactory.get().createIcon(FontAwesomeIcon.EYE,"15");
+                    //final FontIcon plusIcon = new FontIcon("fa-minus");
                     final Button btnDelete = new Button();
-
+                    final Button btnShowFile = new Button();
+                    HBox pane = new HBox(btnDelete,btnShowFile);
                     @Override
                     public void updateItem(String item, boolean empty) {
                         super.updateItem(item, empty);
@@ -212,23 +225,45 @@ public class FXMLController implements Initializable {
                             setGraphic(null);
                             setText(null);
                         } else {
-                            plusIcon.setIconSize(15);
+                            //plusIcon.setIconSize(15);
                             btnDelete.setGraphic(plusIcon);
                             btnDelete.setStyle(
                                     "-fx-background-color:none;"+
                                             "-fx-border:none"
                             );
+
                             btnDelete.setOnMouseEntered(e->{
-                                plusIcon.setIconColor(Color.web("#ff5900",1.0));
+                                //plusIcon.setIconColor(Color.web("#ff5900",1.0));
                             });
                             btnDelete.setOnMouseExited(e -> {
-                                plusIcon.setIconColor(Color.web("#000",1.0));
+                                //plusIcon.setIconColor(Color.web("#000",1.0));
                             });
                             btnDelete.setOnAction(event -> {
                                 //Person person = getTableView().getItems().get(getIndex());
                                 listitems.remove(getTableView().getItems().get(getIndex())) ;
                             });
-                            setGraphic(btnDelete);
+
+
+                            btnShowFile.setGraphic(eyeIcon);
+                            btnShowFile.setStyle(
+                                    "-fx-background-color:none;"+
+                                            "-fx-border:none"
+                            );
+                            btnShowFile.setOnMouseEntered(e->{
+                                //plusIcon.setIconColor(Color.web("#ff5900",1.0));
+                            });
+                            btnShowFile.setOnMouseExited(e -> {
+                                //plusIcon.setIconColor(Color.web("#000",1.0));
+                            });
+                            btnShowFile.setOnAction(event -> {
+
+                                hostServices.showDocument(
+                                        listitems.get(getIndex()).getFilePath()
+                                );
+                            });
+
+
+                            setGraphic(pane);
                             setText(null);
                         }
                     }
@@ -243,4 +278,7 @@ public class FXMLController implements Initializable {
 
     }
 
+    public void setGetHostController(HostServices hostServices) {
+        this.hostServices = hostServices;
+    }
 }
