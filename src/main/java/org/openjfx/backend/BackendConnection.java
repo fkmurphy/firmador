@@ -76,22 +76,16 @@ public class BackendConnection {
         return response;
     }
 
-    public void downloadFile(String document, String dst)
-    {
-        try {
-            URLConnection urlc = new URL(this.url+document).openConnection();
-            urlc.setRequestProperty("Authorization",this.token);
+    public void downloadFile(String document, String dst) throws MalformedURLException, IOException {
+        URLConnection urlc = new URL(this.url+document).openConnection();
+        urlc.setRequestProperty("Authorization",this.token);
 
-            ReadableByteChannel rbc = Channels.newChannel(urlc.getInputStream());
-            FileOutputStream fos = new FileOutputStream(dst);
-            fos.getChannel().transferFrom(rbc,0, Long.MAX_VALUE);
-        } catch (MalformedURLException e) {
-            // TODO: 25/9/20   mensajes
-            e.printStackTrace();
-        } catch (IOException e) {
-            // TODO: 25/9/20 mensajes
-            e.printStackTrace();
-        }
+        ReadableByteChannel rbc = Channels.newChannel(urlc.getInputStream());
+        FileOutputStream fos = new FileOutputStream(dst);
+        fos.getChannel().transferFrom(rbc,0, Long.MAX_VALUE);
+        //} catch (MalformedURLException e) {
+        //} catch (IOException e) {
+        //}
     }
 
     public boolean sendFile(String documentPath, int documentId)

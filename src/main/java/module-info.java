@@ -9,7 +9,7 @@ module org.openjfx {
     requires org.json;
     requires jcifs;
     requires de.jensd.fx.glyphs.fontawesome;
-    requires org.apache.pdfbox;
+    requires org.update4j;
 
 
     opens org.openjfx.Main.models to javafx.base;

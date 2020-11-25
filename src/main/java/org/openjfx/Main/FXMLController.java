@@ -21,8 +21,9 @@ public class FXMLController implements Initializable {
 }
 */
 import javafx.application.HostServices;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.scene.layout.HBox;
-import org.apache.pdfbox.pdmodel.PDDocument;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory;
 import javafx.beans.property.SimpleStringProperty;
@@ -40,7 +41,6 @@ import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.util.Callback;
-import org.apache.pdfbox.text.PDFTextStripper;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.openjfx.backend.BackendConnection;
@@ -112,9 +112,13 @@ public class FXMLController implements Initializable {
             fileSrc = listFilesSrc.next();
             if(fileSrc.getChecked().isSelected()){
                 try {
-                    fileSrc.getFile().sign(token);
-                    fileSrc.setStatus("signed");
+                    if  (!fileSrc.getFile().sign(token)) {
+                        fileSrc.setStatus("fail");
+                    } else {
+                        fileSrc.setStatus("signed");
+                    }
                     fileSrc.setChecked(false);
+
                 } catch (Exception e) {
                     fileSrc.setStatus("fail");
                 }
@@ -241,7 +245,7 @@ public class FXMLController implements Initializable {
 
 
                             btnShowFile.setGraphic(eyeIcon);
-                            btnDelete.setStyle(
+                            btnShowFile.setStyle(
                                     "-fx-background-color:none;"+
                                             "-fx-border:none"
                             );
