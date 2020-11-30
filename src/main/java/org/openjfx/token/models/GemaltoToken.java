@@ -23,7 +23,8 @@ public class GemaltoToken implements Token {
     protected String driverPath;
     private char[] pwd;
     protected Provider provider;
-    public GemaltoToken(String pwd){
+    public GemaltoToken(String pwd)
+    {
         this.driverPath = "";
         Provider prototype = Security.getProvider("SunPKCS11");
         this.provider = this.configureProvider(prototype);

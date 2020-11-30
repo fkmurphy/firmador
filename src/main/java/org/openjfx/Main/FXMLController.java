@@ -20,7 +20,9 @@ public class FXMLController implements Initializable {
     }
 }
 */
+import javafx.animation.PauseTransition;
 import javafx.application.HostServices;
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.layout.HBox;
@@ -39,6 +41,7 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
+import javafx.stage.Popup;
 import javafx.stage.Stage;
 import javafx.util.Callback;
 import org.json.JSONArray;
@@ -50,7 +53,9 @@ import org.openjfx.Main.models.FilesToBeSigned;
 import org.openjfx.token.models.GemaltoToken;
 
 import java.io.*;
+import java.net.ConnectException;
 import java.net.URL;
+import java.net.http.HttpConnectTimeoutException;
 import java.net.http.HttpResponse;
 import java.util.Iterator;
 import java.util.Map;
@@ -83,6 +88,8 @@ public class FXMLController implements Initializable {
     @FXML
     private TableColumn<FilesToBeSigned,Button> tb_status_sign;
 
+    Stage stage;
+
     GemaltoToken token = null;
 
     Map<String,String> mapArgument;
@@ -99,6 +106,11 @@ public class FXMLController implements Initializable {
         backend.start();
     }
 
+    public void setStage(Stage stage)
+    {
+        this.stage = stage;
+    }
+
     @FXML
     void firmarButton() {
         if(token == null){
@@ -110,7 +122,7 @@ public class FXMLController implements Initializable {
 
         while(listFilesSrc.hasNext()){
             fileSrc = listFilesSrc.next();
-            if(fileSrc.getChecked().isSelected()){
+            if (fileSrc.getChecked().isSelected()) {
                 try {
                     if  (!fileSrc.getFile().sign(token)) {
                         fileSrc.setStatus("fail");
@@ -175,32 +187,80 @@ public class FXMLController implements Initializable {
     }
 
     private void processDocumentsBackend() {
-        if (!mapArgument.containsKey("api_url"))
-            return;
-        BackendConnection bk =  BackendConnection.get(mapArgument);
-        HttpResponse<String> response = bk.getRequest("/documents/pending/");
-
-        // TODO: 5/10/20 throwable
-        if (response == null || response.statusCode() != 200)
+        if (mapArgument == null || !mapArgument.containsKey("api_url"))
             return;
 
-        JSONArray array = new JSONArray(response.body());
-        int id,type,number, year, posX, posY;
-        String description;
-        JSONObject json;
-        WorkflowFile ll;
-        for (int i =0;i<array.length();i++){
-            json = (JSONObject)array.get(i);
-            id =  Integer.parseInt(json.get("id").toString());
-            year = Integer.parseInt(json.get("year").toString());
-            type = Integer.parseInt(json.get("type").toString());
-            number = Integer.parseInt(json.get("number").toString());
-            description = json.get("theme").toString();
-            posX = Integer.parseInt(json.get("posX").toString());
-            posY = Integer.parseInt(json.get("posY").toString());
-            ll = new WorkflowFile(id, year, type, number, description, posX, posY);
-            listitems.add( new FilesToBeSigned(ll));
+        BackendConnection bk;
+        HttpResponse<String> response;
+        try {
+            bk =  BackendConnection.get(mapArgument);
+            response = bk.getRequest("/documents/pending/");
+            // TODO: 5/10/20 throwable
+            if (response == null || response.statusCode() != 200)
+                return;
+
+            JSONArray array = new JSONArray(response.body());
+            int id,type,number, year, posX, posY;
+            String description;
+            JSONObject json;
+            WorkflowFile ll;
+            for (int i =0;i<array.length();i++){
+                json = (JSONObject)array.get(i);
+                id =  Integer.parseInt(json.get("id").toString());
+                year = Integer.parseInt(json.get("year").toString());
+                type = Integer.parseInt(json.get("type").toString());
+                number = Integer.parseInt(json.get("number").toString());
+                description = json.get("theme").toString();
+                posX = Integer.parseInt(json.get("posX").toString());
+                posY = Integer.parseInt(json.get("posY").toString());
+                ll = new WorkflowFile(id, year, type, number, description, posX, posY);
+                listitems.add( new FilesToBeSigned(ll));
+            }
+        } catch (ConnectException e) {
+
+            Platform.runLater(()->{
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setHeaderText(null);
+                alert.setTitle("Error al conectarse.");
+                alert.setContentText("verifique que tiene acceso a internet.");
+                alert.showAndWait();
+
+                /*
+                Popup popup = new Popup();
+                popup.setAutoHide(false);
+                popup.setAutoFix(true);
+                //popup.set
+                popup.getContent().add(new Label("QWeqweqwe"));
+                PauseTransition delay = new PauseTransition(javafx.util.Duration.seconds(3));
+                delay.setOnFinished(event -> popup.hide());
+                delay.play();
+                popup.show(stage);*/
+            });
+
+
+        } catch (HttpConnectTimeoutException e) {
+            Platform.runLater(()-> {
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setHeaderText(null);
+                alert.setTitle("Tiempo de espera agotado");
+                alert.setContentText("Parece que ha tardado demasiado en adquirir los documentos.");
+                alert.showAndWait();
+
+            });
+        } catch (IOException e) {
+            Platform.runLater(()-> {
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setHeaderText(null);
+                alert.setTitle("¡Error!");
+                alert.setContentText("Hubo un problema con la conexión. ERR: #35501");
+                alert.showAndWait();
+
+            });
+        } catch (InterruptedException e) {
         }
+
+
+
 
     }
 

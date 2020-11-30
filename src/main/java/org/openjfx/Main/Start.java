@@ -41,11 +41,22 @@ public class Start extends Application {
 
             //System.out.println(getClass().getResource("/org/openjfx/Main/scene.fxml"));
         FXMLLoader loader = new FXMLLoader(getClass().getResource("scene.fxml"));
-        Map<String,String> map = processArgs(getParameters().getRaw());
+        Map<String,String> map = null;
+        try {
+            map = processArgs(getParameters().getRaw());
+        } catch (Exception e){
+            Alert alert = new Alert(Alert.AlertType.WARNING);
+            alert.setHeaderText(null);
+            alert.setTitle("Atención");
+            alert.setContentText("No se han podido obtener archivos externos.");
+
+            alert.showAndWait();
+        }
 
         Parent root = (Parent) loader.load();
         FXMLController controller = loader.getController();
         controller.setBackendMap(map);
+        controller.setStage(stage);
         controller.setGetHostController(getHostServices());
 
         /*Alert a = new Alert(Alert.AlertType.ERROR);
