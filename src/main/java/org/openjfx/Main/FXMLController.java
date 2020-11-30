@@ -161,7 +161,6 @@ public class FXMLController implements Initializable {
     void btnTokenInfoAction() {
         try {
             Parent root  = FXMLLoader.load(getClass().getClassLoader().getResource("token_info.fxml"));
-            Stage stage = (Stage) btn_select_file.getScene().getWindow();
             stage.setScene(new Scene(root));
             stage.show();
         } catch (IOException e) {
