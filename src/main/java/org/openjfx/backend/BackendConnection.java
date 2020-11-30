@@ -87,6 +87,7 @@ public class BackendConnection {
         ReadableByteChannel rbc = Channels.newChannel(urlc.getInputStream());
         FileOutputStream fos = new FileOutputStream(dst);
         fos.getChannel().transferFrom(rbc,0, Long.MAX_VALUE);
+        fos.close();
         //} catch (MalformedURLException e) {
         //} catch (IOException e) {
         //}
