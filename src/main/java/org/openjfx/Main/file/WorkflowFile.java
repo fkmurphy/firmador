@@ -1,10 +1,12 @@
 package org.openjfx.Main.file;
 
+import com.itextpdf.text.DocumentException;
 import org.openjfx.backend.BackendConnection;
 import org.openjfx.Main.file.helpers.PathHelper;
 import org.openjfx.token.models.Token;
 
 import java.io.IOException;
+import java.security.GeneralSecurityException;
 
 
 public class WorkflowFile implements FileRepository {
@@ -61,7 +63,15 @@ public class WorkflowFile implements FileRepository {
 
         String dstFilename = PathHelper.generateDestionationPath(srcPath);
         if (dstFilename != null && dstFilename != ""){
-            token.signWithPositionStamper(srcPath, dstFilename, posX, posY);
+            try {
+                token.signWithPositionStamper(srcPath, dstFilename, posX, posY);
+            } catch (GeneralSecurityException e) {
+                return false;
+            } catch (DocumentException e) {
+                return false;
+            } catch (IOException e) {
+                return false;
+            }
             BackendConnection.get().sendFile(dstFilename,this.id);
             return true;
         } else {

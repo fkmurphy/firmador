@@ -172,17 +172,15 @@ public class GemaltoToken implements Token {
         System.out.println(passwordLine);
         return passwordLine;
     }*/
-    public void sign(String src, String dst){
+    public void sign(String src, String dst) throws GeneralSecurityException, DocumentException, IOException {
         this.signWithPositionStamper(src,dst,40,40); // Dejo como estaba todo antes
     }
-    public void signWithPositionStamper(String src, String dst, int posX,int posY){
-        try {
+    public void signWithPositionStamper(String src, String dst, int posX,int posY) throws GeneralSecurityException, DocumentException, IOException {
+        //try {
             KeyStore ks = getKeystoreInstance();
             if(ks == null)
                 throw new NullPointerException();
             Enumeration<String> aliases = ks.aliases();
-
-
 
             //s.deleteEntry("algo");
             PrivateKey privKey = null;
@@ -205,7 +203,7 @@ public class GemaltoToken implements Token {
             while (aliases.hasMoreElements()) {
                 ks.deleteEntry(aliases.nextElement());
             }
-        } catch (IOException e) {
+        /*} catch (IOException e) {
             e.printStackTrace();
         }catch (KeyStoreException e) {
             System.out.println("Error keystore");
@@ -222,7 +220,7 @@ public class GemaltoToken implements Token {
         } catch (GeneralSecurityException e) {
             System.out.println("Error general security");
             e.printStackTrace();
-        }
+        }*/
 
     }
 
@@ -233,8 +231,7 @@ public class GemaltoToken implements Token {
 
         // Creating the reader and the stamper
         PdfReader reader = new PdfReader(src);
-        Rectangle lala = reader.getPageSize(reader.getNumberOfPages());
-        System.out.println("size"+lala.toString()+"bottom"+lala.getBottom()+"borderwidh:"+lala.getBorderWidth());
+        //Rectangle lala = reader.getPageSize(reader.getNumberOfPages());
         FileOutputStream os = new FileOutputStream(dest);
         PdfStamper stamper = PdfStamper.createSignature(reader, os, '\0',null,true);
         // Creating the appearance
@@ -249,7 +246,6 @@ public class GemaltoToken implements Token {
         }*/
         appearance.setCertificationLevel(certLevel);
 
-        System.out.println(LocalDateTime.now().toString());
         int lastPage = reader.getNumberOfPages();
         // 40 = 1cm
         // 40 init x | 40 init y (1cmX x 1cmY)
