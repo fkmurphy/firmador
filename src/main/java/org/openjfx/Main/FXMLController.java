@@ -113,9 +113,8 @@ public class FXMLController implements Initializable {
 
     @FXML
     void firmarButton() {
-        if(token == null){
-            token = new GemaltoToken(password_token.getText());
-        }
+        token = new GemaltoToken(password_token.getText());
+
 
         Iterator<FilesToBeSigned> listFilesSrc = listitems.iterator();
         FilesToBeSigned fileSrc;

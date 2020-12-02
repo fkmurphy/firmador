@@ -79,6 +79,7 @@ public class GemaltoToken implements Token {
         } catch (KeyStoreException e) {
             e.printStackTrace();
         } catch (IOException e) {
+            Security.removeProvider(provider.getName());
             System.out.println("Una excepción con el token");
             //e.printStackTrace();
         } catch (Exception e) {
@@ -180,6 +181,10 @@ public class GemaltoToken implements Token {
             if(ks == null)
                 throw new NullPointerException();
             Enumeration<String> aliases = ks.aliases();
+
+
+
+            //s.deleteEntry("algo");
             PrivateKey privKey = null;
             Certificate[] chain = null;
             if (aliases != null){
@@ -197,6 +202,9 @@ public class GemaltoToken implements Token {
             processSign(src, dst, chain,privKey, DigestAlgorithms.SHA256,
                     getProvider().getName(), MakeSignature.CryptoStandard.CMS,
                     "-", "Viedma, Río Negro, Argentina", posX, posY);
+            while (aliases.hasMoreElements()) {
+                ks.deleteEntry(aliases.nextElement());
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }catch (KeyStoreException e) {
