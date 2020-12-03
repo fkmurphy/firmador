@@ -71,7 +71,6 @@ public class FilesToBeSigned {
         Text icon;
         switch (status) {
             case "signed":
-
                 icon = FontAwesomeIconFactory.get().createIcon(FontAwesomeIcon.CHECK);
                 break;
             case "fail":

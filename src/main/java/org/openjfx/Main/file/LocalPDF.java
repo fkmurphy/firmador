@@ -32,10 +32,13 @@ public class LocalPDF implements FileRepository{
             try {
                 token.sign(getPath(), dstFilename);
             } catch (GeneralSecurityException e) {
+                System.out.println(e);
                 return false;
             } catch (DocumentException e) {
+                System.out.println(e);
                 return false;
             } catch (IOException e) {
+                System.out.println(e);
                 return false;
             }
             return true;

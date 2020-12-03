@@ -27,6 +27,7 @@ public class GemaltoToken implements Token {
     {
         this.driverPath = "";
         Provider prototype = Security.getProvider("SunPKCS11");
+
         this.provider = this.configureProvider(prototype);
         /*this.provider = prototype.configure("--name=eToken\n" +
                 "library=/lib64/libeToken.so\n" +
@@ -73,8 +74,11 @@ public class GemaltoToken implements Token {
 
     private KeyStore getKeystoreInstance(){
         try {
-            KeyStore ks = KeyStore.getInstance("PKCS11", this.provider);
-            ks.load(null, pwd);
+            //KeyStore ks = KeyStore.getInstance("PKCS11", this.provider);
+
+            KeyStore ks = KeyStore.getInstance("PKCS11");
+            ks.load(null,pwd);
+
             return ks;
         } catch (KeyStoreException e) {
             e.printStackTrace();
@@ -95,6 +99,7 @@ public class GemaltoToken implements Token {
             if(ks == null)
                 throw new NullPointerException();
             Enumeration<String> aliases = ks.aliases();
+
             if(aliases != null){
                 String alias = aliases.nextElement();
                 cert = (X509Certificate) ks.getCertificate(alias);
@@ -181,7 +186,11 @@ public class GemaltoToken implements Token {
             if(ks == null)
                 throw new NullPointerException();
             Enumeration<String> aliases = ks.aliases();
-
+            System.out.println("Se imprimen los aliases para obtener cert");
+            while (aliases.hasMoreElements()) {
+                System.out.println(aliases.nextElement());
+            }
+            aliases = ks.aliases();
             //s.deleteEntry("algo");
             PrivateKey privKey = null;
             Certificate[] chain = null;
@@ -200,9 +209,15 @@ public class GemaltoToken implements Token {
             processSign(src, dst, chain,privKey, DigestAlgorithms.SHA256,
                     getProvider().getName(), MakeSignature.CryptoStandard.CMS,
                     "-", "Viedma, Río Negro, Argentina", posX, posY);
-            while (aliases.hasMoreElements()) {
-                ks.deleteEntry(aliases.nextElement());
-            }
+
+            String aliase;
+           /* while (aliases.hasMoreElements()) {
+                aliase = aliases.nextElement();
+
+                System.out.println("Eliminando entry " + aliase);
+                ks.deleteEntry(aliase);
+            }*/
+
         /*} catch (IOException e) {
             e.printStackTrace();
         }catch (KeyStoreException e) {
@@ -256,8 +271,9 @@ public class GemaltoToken implements Token {
 
         MakeSignature.signDetached(appearance, digest, signature, chain,
                 null, null, null, 0, subfilter);
+
         stamper.close();
-        os.close();
         reader.close();
+        os.close();
     }
 }
