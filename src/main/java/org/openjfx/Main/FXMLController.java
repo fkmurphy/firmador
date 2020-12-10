@@ -38,6 +38,8 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.layout.Region;
+import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
@@ -50,6 +52,7 @@ import org.openjfx.backend.BackendConnection;
 import org.openjfx.Main.file.LocalPDF;
 import org.openjfx.Main.file.WorkflowFile;
 import org.openjfx.Main.models.FilesToBeSigned;
+import org.openjfx.components.Notification;
 import org.openjfx.token.models.GemaltoToken;
 
 import java.io.*;
@@ -64,6 +67,9 @@ import java.util.ResourceBundle;
 public class FXMLController implements Initializable {
     @FXML
     private PasswordField password_token;
+
+    @FXML
+    private MenuBar menuBar;
 
     /**
      * Buttons
@@ -151,6 +157,32 @@ public class FXMLController implements Initializable {
         if(!listitems.contains(newFile)) {
             listitems.add(newFile);
         }
+        /*
+        Popup popup = new Popup();
+        popup.setAutoHide(false);
+        popup.setAutoFix(true);
+        Label text = new Label("QWeqweqwe");
+        text.setMinWidth(50);
+        text.setPrefWidth(stage.getWidth());
+        text.setMaxWidth(400);
+        text.setStyle("-fx-background-color:black;"
+                + " -fx-text-fill: " + "white" + ";"
+                + " -fx-font-size: " + "1em" + ";"
+                + " -fx-padding: 10px;"
+                + " -fx-background-radius: 6;");
+        popup.getContent().add(text);
+        //popup.setX();
+        //popup.setY();
+
+        PauseTransition delay = new PauseTransition(javafx.util.Duration.seconds(5));
+        delay.setOnFinished(event -> popup.hide());
+        delay.play();
+        popup.show(stage,
+                stage.getX() + menuBar.getBoundsInLocal().getMinY(),
+                stage.getY() + menuBar.getBoundsInLocal().getMaxY() + menuBar.getHeight()
+        );*/
+        //notificationPane.getChildren().add(Notification.createClipped());
+
         //listitems.add(fileSelected.getAbsolutePath());
         //list_files.refresh();
 
@@ -256,9 +288,6 @@ public class FXMLController implements Initializable {
             });
         } catch (InterruptedException e) {
         }
-
-
-
 
     }
 
