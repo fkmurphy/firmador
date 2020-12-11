@@ -154,9 +154,12 @@ public class FXMLController implements Initializable {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Elegir un archivo");
         File fileSelected = fileChooser.showOpenDialog(new Stage());
-        FilesToBeSigned newFile = new FilesToBeSigned(new LocalPDF(fileSelected.getAbsolutePath()),true);
-        if(!listitems.contains(newFile)) {
-            listitems.add(newFile);
+        if (fileSelected != null) {
+            fileSelected = fileSelected.getAbsoluteFile();
+            FilesToBeSigned newFile = new FilesToBeSigned(new LocalPDF(fileSelected.getAbsolutePath()), true);
+            if(!listitems.contains(newFile)) {
+                listitems.add(newFile);
+            }
         }
 
 
