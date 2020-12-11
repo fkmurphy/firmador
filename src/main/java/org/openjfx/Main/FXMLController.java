@@ -23,6 +23,8 @@ public class FXMLController implements Initializable {
 import javafx.animation.PauseTransition;
 import javafx.application.HostServices;
 import javafx.application.Platform;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.layout.HBox;
@@ -42,9 +44,7 @@ import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
-import javafx.stage.FileChooser;
-import javafx.stage.Popup;
-import javafx.stage.Stage;
+import javafx.stage.*;
 import javafx.util.Callback;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -53,6 +53,7 @@ import org.openjfx.Main.file.LocalPDF;
 import org.openjfx.Main.file.WorkflowFile;
 import org.openjfx.Main.models.FilesToBeSigned;
 import org.openjfx.components.Notification;
+import org.openjfx.components.PopupComponent;
 import org.openjfx.token.models.GemaltoToken;
 
 import java.io.*;
@@ -157,30 +158,10 @@ public class FXMLController implements Initializable {
         if(!listitems.contains(newFile)) {
             listitems.add(newFile);
         }
-        /*
-        Popup popup = new Popup();
-        popup.setAutoHide(false);
-        popup.setAutoFix(true);
-        Label text = new Label("QWeqweqwe");
-        text.setMinWidth(50);
-        text.setPrefWidth(stage.getWidth());
-        text.setMaxWidth(400);
-        text.setStyle("-fx-background-color:black;"
-                + " -fx-text-fill: " + "white" + ";"
-                + " -fx-font-size: " + "1em" + ";"
-                + " -fx-padding: 10px;"
-                + " -fx-background-radius: 6;");
-        popup.getContent().add(text);
-        //popup.setX();
-        //popup.setY();
 
-        PauseTransition delay = new PauseTransition(javafx.util.Duration.seconds(5));
-        delay.setOnFinished(event -> popup.hide());
-        delay.play();
-        popup.show(stage,
-                stage.getX() + menuBar.getBoundsInLocal().getMinY(),
-                stage.getY() + menuBar.getBoundsInLocal().getMaxY() + menuBar.getHeight()
-        );*/
+
+
+
         //notificationPane.getChildren().add(Notification.createClipped());
 
         //listitems.add(fileSelected.getAbsolutePath());
@@ -249,39 +230,34 @@ public class FXMLController implements Initializable {
         } catch (ConnectException e) {
 
             Platform.runLater(()->{
-                Alert alert = new Alert(Alert.AlertType.ERROR);
+                /*Alert alert = new Alert(Alert.AlertType.ERROR);
                 alert.setHeaderText(null);
                 alert.setTitle("Error al conectarse.");
                 alert.setContentText("verifique que tiene acceso a internet.");
-                alert.showAndWait();
+                alert.showAndWait();*/
+                PopupComponent popc = new PopupComponent("Parece que ha tardado demasiado en adquirir los documentos.", stage.getScene().getWindow());
+                popc.showPopup().show(stage.getScene().getWindow());
 
-                /*
-                Popup popup = new Popup();
-                popup.setAutoHide(false);
-                popup.setAutoFix(true);
-                //popup.set
-                popup.getContent().add(new Label("QWeqweqwe"));
-                PauseTransition delay = new PauseTransition(javafx.util.Duration.seconds(3));
-                delay.setOnFinished(event -> popup.hide());
-                delay.play();
-                popup.show(stage);*/
             });
 
 
         } catch (HttpConnectTimeoutException e) {
             Platform.runLater(()-> {
-                Alert alert = new Alert(Alert.AlertType.ERROR);
+                /*Alert alert = new Alert(Alert.AlertType.ERROR);
                 alert.setHeaderText(null);
                 alert.setTitle("Tiempo de espera agotado");
                 alert.setContentText("Parece que ha tardado demasiado en adquirir los documentos.");
-                alert.showAndWait();
+                alert.showAndWait();*/
+
+                PopupComponent popc = new PopupComponent("Parece que ha tardado demasiado en adquirir los documentos.", stage.getScene().getWindow());
+                popc.showPopup().show(stage.getScene().getWindow());
 
             });
         } catch (IOException e) {
             Platform.runLater(()-> {
                 Alert alert = new Alert(Alert.AlertType.ERROR);
                 alert.setHeaderText(null);
-                alert.setTitle("¡Error!");
+                alert.setTitle("¡Error al obtener los documentos!");
                 alert.setContentText("Hubo un problema con la conexión. ERR: #35501");
                 alert.showAndWait();
 
