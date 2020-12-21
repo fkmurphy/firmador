@@ -1,3 +1,6 @@
 .label {
     -fx-text-fill: black;
 }
+.table-column {
+  -fx-alignment: CENTER;
+}
