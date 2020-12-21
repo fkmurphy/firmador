@@ -19,7 +19,7 @@
          <menus>
             <Menu mnemonicParsing="false" text="Ayuda">
                <items>
-                  <MenuItem fx:id="acercaDe" mnemonicParsing="false" text="Acerca de..." />
+                  <MenuItem onAction="#actionOpenAbout" fx:id="acercaDe" mnemonicParsing="false" text="Acerca de..." />
                </items>
             </Menu>
          </menus>
@@ -41,8 +41,8 @@
       </HBox>
       <ButtonBar buttonMinWidth="50.0" cacheShape="false" centerShape="false" focusTraversable="false" maxHeight="-Infinity" prefHeight="50.0" prefWidth="540.0" scaleShape="false" VBox.vgrow="SOMETIMES">
          <buttons>
-            <Button ButtonBar.buttonData="left" fx:id="closeSigner" alignment="CENTER" maxWidth="20.0" mnemonicParsing="false" onAction="#actionCloseSigner" prefHeight="25.0" text="Cerrar" />
-            <Button  fx:id="btn_select_file" alignment="CENTER" contentDisplay="CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minWidth="-Infinity" mnemonicParsing="false" onAction="#selectFile" prefHeight="26.0" prefWidth="154.0" text="Agregar Archivo" textAlignment="CENTER" wrapText="true">
+            <Button fx:id="closeSigner" alignment="CENTER" maxWidth="20.0" mnemonicParsing="false" onAction="#actionCloseSigner" prefHeight="25.0" text="Cerrar" ButtonBar.buttonData="left" />
+            <Button fx:id="btn_select_file" alignment="CENTER" contentDisplay="CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minWidth="-Infinity" mnemonicParsing="false" onAction="#selectFile" prefHeight="26.0" prefWidth="154.0" text="Agregar Archivo" textAlignment="CENTER" wrapText="true">
                   </Button>
             <PasswordField fx:id="password_token" promptText="Contraseña" />
             <Button fx:id="btn_firmar" mnemonicParsing="false" onAction="#firmarButton" prefHeight="26.0" text="Firmar" textAlignment="CENTER" />
