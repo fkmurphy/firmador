@@ -71,11 +71,11 @@ public class FilesToBeSigned {
         Text icon;
         switch (status) {
             case "signed":
-
                 icon = FontAwesomeIconFactory.get().createIcon(FontAwesomeIcon.CHECK);
                 break;
             case "fail":
                 icon = FontAwesomeIconFactory.get().createIcon(FontAwesomeIcon.CLOSE);
+                break;
             default:
                 icon = FontAwesomeIconFactory.get().createIcon(FontAwesomeIcon.FILE_PDF_ALT);
                 break;

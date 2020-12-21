@@ -20,7 +20,11 @@ public class FXMLController implements Initializable {
     }
 }
 */
+import javafx.animation.PauseTransition;
 import javafx.application.HostServices;
+import javafx.application.Platform;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.layout.HBox;
@@ -36,10 +40,11 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.layout.Region;
+import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
-import javafx.stage.FileChooser;
-import javafx.stage.Stage;
+import javafx.stage.*;
 import javafx.util.Callback;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -47,10 +52,14 @@ import org.openjfx.backend.BackendConnection;
 import org.openjfx.Main.file.LocalPDF;
 import org.openjfx.Main.file.WorkflowFile;
 import org.openjfx.Main.models.FilesToBeSigned;
+import org.openjfx.components.Notification;
+import org.openjfx.components.PopupComponent;
 import org.openjfx.token.models.GemaltoToken;
 
 import java.io.*;
+import java.net.ConnectException;
 import java.net.URL;
+import java.net.http.HttpConnectTimeoutException;
 import java.net.http.HttpResponse;
 import java.util.Iterator;
 import java.util.Map;
@@ -59,6 +68,14 @@ import java.util.ResourceBundle;
 public class FXMLController implements Initializable {
     @FXML
     private PasswordField password_token;
+
+    @FXML
+    private MenuBar menuBar;
+    @FXML
+    private MenuItem about_button;
+
+    @FXML
+    private Button closeSigner;
 
     /**
      * Buttons
@@ -83,6 +100,8 @@ public class FXMLController implements Initializable {
     @FXML
     private TableColumn<FilesToBeSigned,Button> tb_status_sign;
 
+    Stage stage;
+
     GemaltoToken token = null;
 
     Map<String,String> mapArgument;
@@ -99,18 +118,22 @@ public class FXMLController implements Initializable {
         backend.start();
     }
 
+    public void setStage(Stage stage)
+    {
+        this.stage = stage;
+    }
+
     @FXML
     void firmarButton() {
-        if(token == null){
-            token = new GemaltoToken(password_token.getText());
-        }
+        token = new GemaltoToken(password_token.getText());
+
 
         Iterator<FilesToBeSigned> listFilesSrc = listitems.iterator();
         FilesToBeSigned fileSrc;
 
         while(listFilesSrc.hasNext()){
             fileSrc = listFilesSrc.next();
-            if(fileSrc.getChecked().isSelected()){
+            if (fileSrc.getChecked().isSelected()) {
                 try {
                     if  (!fileSrc.getFile().sign(token)) {
                         fileSrc.setStatus("fail");
@@ -124,7 +147,6 @@ public class FXMLController implements Initializable {
                 }
             }
         }
-
         //String src = org.openjfx.HelloFX.class.getClassLoader().getResource("uno.pdf").getFile();
         //String dest = String.format("/home/jmurphy/hola2.pdf",1);
         //token.sign(src, String.format(dest, 1));
@@ -136,25 +158,54 @@ public class FXMLController implements Initializable {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Elegir un archivo");
         File fileSelected = fileChooser.showOpenDialog(new Stage());
-        FilesToBeSigned newFile = new FilesToBeSigned(new LocalPDF(fileSelected.getAbsolutePath()),true);
-        if(!listitems.contains(newFile)) {
-            listitems.add(newFile);
+        if (fileSelected != null) {
+            fileSelected = fileSelected.getAbsoluteFile();
+            FilesToBeSigned newFile = new FilesToBeSigned(new LocalPDF(fileSelected.getAbsolutePath()), true);
+            if(!listitems.contains(newFile)) {
+                listitems.add(newFile);
+            }
         }
+        //notificationPane.getChildren().add(Notification.createClipped());
+
         //listitems.add(fileSelected.getAbsolutePath());
         //list_files.refresh();
-
     }
 
     @FXML
     void btnTokenInfoAction() {
         try {
             Parent root  = FXMLLoader.load(getClass().getClassLoader().getResource("token_info.fxml"));
-            Stage stage = (Stage) btn_select_file.getScene().getWindow();
             stage.setScene(new Scene(root));
             stage.show();
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    @FXML
+    public void actionCloseSigner()
+    {
+        stage.close();
+    }
+
+    @FXML
+    public void actionOpenAbout()
+    {
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("about.fxml"));
+        Parent root = null;
+        try {
+            root = (Parent) loader.load();
+            Scene scene = new Scene(root);
+            Stage aboutStage = new Stage();
+            aboutStage.initModality(Modality.APPLICATION_MODAL);
+            aboutStage.setTitle("Más información");
+            aboutStage.setScene(scene);
+            aboutStage.setResizable(false);
+            aboutStage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
     }
 
     @Override
@@ -166,40 +217,76 @@ public class FXMLController implements Initializable {
         table_files.setItems(listitems);
         tb_description.setCellValueFactory(cd -> new SimpleStringProperty(cd.getValue().getDescriptionFile()));
         actionColumn();
-
-
         /*listitems.add(
                 new FilesToBeSigned((FileRepository) new SambaConnection())
         );*/
-
     }
 
     private void processDocumentsBackend() {
-        if (!mapArgument.containsKey("api_url"))
-            return;
-        BackendConnection bk =  BackendConnection.get(mapArgument);
-        HttpResponse<String> response = bk.getRequest("/documents/pending/");
-
-        // TODO: 5/10/20 throwable
-        if (response == null || response.statusCode() != 200)
+        if (mapArgument == null || !mapArgument.containsKey("api_url"))
             return;
 
-        JSONArray array = new JSONArray(response.body());
-        int id,type,number, year, posX, posY;
-        String description;
-        JSONObject json;
-        WorkflowFile ll;
-        for (int i =0;i<array.length();i++){
-            json = (JSONObject)array.get(i);
-            id =  Integer.parseInt(json.get("id").toString());
-            year = Integer.parseInt(json.get("year").toString());
-            type = Integer.parseInt(json.get("type").toString());
-            number = Integer.parseInt(json.get("number").toString());
-            description = json.get("theme").toString();
-            posX = Integer.parseInt(json.get("posX").toString());
-            posY = Integer.parseInt(json.get("posY").toString());
-            ll = new WorkflowFile(id, year, type, number, description, posX, posY);
-            listitems.add( new FilesToBeSigned(ll));
+        BackendConnection bk;
+        HttpResponse<String> response;
+        try {
+            bk =  BackendConnection.get(mapArgument);
+            response = bk.getRequest("/documents/pending/");
+            // TODO: 5/10/20 throwable
+            if (response == null || response.statusCode() != 200)
+                return;
+
+            JSONArray array = new JSONArray(response.body());
+            int id,type,number, year, posX, posY;
+            String description;
+            JSONObject json;
+            WorkflowFile ll;
+            for (int i =0;i<array.length();i++){
+                json = (JSONObject)array.get(i);
+                id =  Integer.parseInt(json.get("id").toString());
+                year = Integer.parseInt(json.get("year").toString());
+                type = Integer.parseInt(json.get("type").toString());
+                number = Integer.parseInt(json.get("number").toString());
+                description = json.get("theme").toString();
+                posX = Integer.parseInt(json.get("posX").toString());
+                posY = Integer.parseInt(json.get("posY").toString());
+                ll = new WorkflowFile(id, year, type, number, description, posX, posY);
+                listitems.add( new FilesToBeSigned(ll));
+            }
+        } catch (ConnectException e) {
+
+            Platform.runLater(()->{
+                /*Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setHeaderText(null);
+                alert.setTitle("Error al conectarse.");
+                alert.setContentText("verifique que tiene acceso a internet.");
+                alert.showAndWait();*/
+                PopupComponent popc = new PopupComponent("Parece que ha tardado demasiado en adquirir los documentos.", stage.getScene().getWindow());
+                popc.showPopup().show(stage.getScene().getWindow());
+
+            });
+
+        } catch (HttpConnectTimeoutException e) {
+            Platform.runLater(()-> {
+                /*Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setHeaderText(null);
+                alert.setTitle("Tiempo de espera agotado");
+                alert.setContentText("Parece que ha tardado demasiado en adquirir los documentos.");
+                alert.showAndWait();*/
+
+                PopupComponent popc = new PopupComponent("Parece que ha tardado demasiado en adquirir los documentos.", stage.getScene().getWindow());
+                popc.showPopup().show(stage.getScene().getWindow());
+
+            });
+        } catch (IOException e) {
+            Platform.runLater(()-> {
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setHeaderText(null);
+                alert.setTitle("¡Error al obtener los documentos!");
+                alert.setContentText("Hubo un problema con la conexión. ERR: #35501");
+                alert.showAndWait();
+
+            });
+        } catch (InterruptedException e) {
         }
 
     }
@@ -233,10 +320,10 @@ public class FXMLController implements Initializable {
                             );
 
                             btnDelete.setOnMouseEntered(e->{
-                                //plusIcon.setIconColor(Color.web("#ff5900",1.0));
+                                plusIcon.setFill(Color.RED);
                             });
                             btnDelete.setOnMouseExited(e -> {
-                                //plusIcon.setIconColor(Color.web("#000",1.0));
+                                plusIcon.setFill(Color.BLACK);
                             });
                             btnDelete.setOnAction(event -> {
                                 //Person person = getTableView().getItems().get(getIndex());
@@ -250,18 +337,16 @@ public class FXMLController implements Initializable {
                                             "-fx-border:none"
                             );
                             btnShowFile.setOnMouseEntered(e->{
-                                //plusIcon.setIconColor(Color.web("#ff5900",1.0));
+                                eyeIcon.setFill(Color.CYAN);
                             });
                             btnShowFile.setOnMouseExited(e -> {
-                                //plusIcon.setIconColor(Color.web("#000",1.0));
+                                eyeIcon.setFill(Color.BLACK);
                             });
                             btnShowFile.setOnAction(event -> {
-
                                 hostServices.showDocument(
                                         listitems.get(getIndex()).getFilePath()
                                 );
                             });
-
 
                             setGraphic(pane);
                             setText(null);

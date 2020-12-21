@@ -1,5 +1,8 @@
 package org.openjfx.backend;
 
+import javafx.animation.PauseTransition;
+import javafx.scene.control.Alert;
+import javafx.stage.Stage;
 import javafx.util.converter.ByteStringConverter;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -50,7 +53,7 @@ public class BackendConnection {
      * @param documents
      * @return HttpResponse documents
      */
-    public HttpResponse<String> getRequest(String documents)
+    public HttpResponse<String> getRequest(String documents) throws HttpConnectTimeoutException, ConnectException, IOException, InterruptedException
     {
         HttpRequest request = HttpRequest.newBuilder()
                 .GET()
@@ -63,17 +66,18 @@ public class BackendConnection {
 
         try {
             response = this.client.send(request, HttpResponse.BodyHandlers.ofString());
-            System.out.println(response.body());
             return response;
         } catch (HttpConnectTimeoutException e) {
             //e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+            throw new HttpConnectTimeoutException("timeout http connect");
+        } catch (ConnectException e) {
+            throw new ConnectException("check network");
 
-        return response;
+        } catch (IOException e) {
+            throw new IOException("-");
+        } catch (InterruptedException e) {
+            throw new InterruptedException(".");
+        }
     }
 
     public void downloadFile(String document, String dst) throws MalformedURLException, IOException {
@@ -83,6 +87,7 @@ public class BackendConnection {
         ReadableByteChannel rbc = Channels.newChannel(urlc.getInputStream());
         FileOutputStream fos = new FileOutputStream(dst);
         fos.getChannel().transferFrom(rbc,0, Long.MAX_VALUE);
+        fos.close();
         //} catch (MalformedURLException e) {
         //} catch (IOException e) {
         //}
