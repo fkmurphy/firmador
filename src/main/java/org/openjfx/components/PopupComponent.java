@@ -1,14 +1,12 @@
 package org.openjfx.components;
 
 import javafx.animation.PauseTransition;
-import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.scene.control.Label;
 import javafx.stage.Popup;
 import javafx.stage.Stage;
 import javafx.stage.Window;
 import javafx.stage.WindowEvent;
-import org.w3c.dom.events.MouseEvent;
 
 public class PopupComponent {
     protected Popup popup;
@@ -38,12 +36,10 @@ public class PopupComponent {
         });
         //popup.setX(stage.getX() + stage.getWidth() / 2- popup.getWidth() / 2); //dialog.getWidth() = NaN
         //popup.setY(stage.getY());// - popup.getHeight() / 2); //dialog.getHeight() = NaN
-
-
     }
 
-    public Popup showPopup() {
-
+    public Popup showPopup()
+    {
         PauseTransition delay = new PauseTransition(javafx.util.Duration.seconds(5));
         delay.setOnFinished(event -> popup.hide());
         delay.play();

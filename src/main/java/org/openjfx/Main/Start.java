@@ -37,9 +37,7 @@ public class Start extends Application {
         /**
          * update
          */
-
-
-            //System.out.println(getClass().getResource("/org/openjfx/Main/scene.fxml"));
+        //System.out.println(getClass().getResource("/org/openjfx/Main/scene.fxml"));
         FXMLLoader loader = new FXMLLoader(getClass().getResource("scene.fxml"));
         Map<String,String> map = null;
         try {

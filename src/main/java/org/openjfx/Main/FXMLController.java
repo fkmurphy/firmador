@@ -72,6 +72,9 @@ public class FXMLController implements Initializable {
     @FXML
     private MenuBar menuBar;
 
+    @FXML
+    private Button closeSigner;
+
     /**
      * Buttons
      */
@@ -142,7 +145,6 @@ public class FXMLController implements Initializable {
                 }
             }
         }
-
         //String src = org.openjfx.HelloFX.class.getClassLoader().getResource("uno.pdf").getFile();
         //String dest = String.format("/home/jmurphy/hola2.pdf",1);
         //token.sign(src, String.format(dest, 1));
@@ -161,15 +163,10 @@ public class FXMLController implements Initializable {
                 listitems.add(newFile);
             }
         }
-
-
-
-
         //notificationPane.getChildren().add(Notification.createClipped());
 
         //listitems.add(fileSelected.getAbsolutePath());
         //list_files.refresh();
-
     }
 
     @FXML
@@ -183,6 +180,12 @@ public class FXMLController implements Initializable {
         }
     }
 
+    @FXML
+    public void actionCloseSigner()
+    {
+        stage.close();
+    }
+
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         //list_files.setItems(listitems);
@@ -192,12 +195,9 @@ public class FXMLController implements Initializable {
         table_files.setItems(listitems);
         tb_description.setCellValueFactory(cd -> new SimpleStringProperty(cd.getValue().getDescriptionFile()));
         actionColumn();
-
-
         /*listitems.add(
                 new FilesToBeSigned((FileRepository) new SambaConnection())
         );*/
-
     }
 
     private void processDocumentsBackend() {
@@ -242,7 +242,6 @@ public class FXMLController implements Initializable {
                 popc.showPopup().show(stage.getScene().getWindow());
 
             });
-
 
         } catch (HttpConnectTimeoutException e) {
             Platform.runLater(()-> {
