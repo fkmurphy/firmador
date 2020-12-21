@@ -298,10 +298,10 @@ public class FXMLController implements Initializable {
                             );
 
                             btnDelete.setOnMouseEntered(e->{
-                                //plusIcon.setIconColor(Color.web("#ff5900",1.0));
+                                plusIcon.setFill(Color.RED);
                             });
                             btnDelete.setOnMouseExited(e -> {
-                                //plusIcon.setIconColor(Color.web("#000",1.0));
+                                plusIcon.setFill(Color.BLACK);
                             });
                             btnDelete.setOnAction(event -> {
                                 //Person person = getTableView().getItems().get(getIndex());
@@ -315,18 +315,16 @@ public class FXMLController implements Initializable {
                                             "-fx-border:none"
                             );
                             btnShowFile.setOnMouseEntered(e->{
-                                //plusIcon.setIconColor(Color.web("#ff5900",1.0));
+                                eyeIcon.setFill(Color.CYAN);
                             });
                             btnShowFile.setOnMouseExited(e -> {
-                                //plusIcon.setIconColor(Color.web("#000",1.0));
+                                eyeIcon.setFill(Color.BLACK);
                             });
                             btnShowFile.setOnAction(event -> {
-
                                 hostServices.showDocument(
                                         listitems.get(getIndex()).getFilePath()
                                 );
                             });
-
 
                             setGraphic(pane);
                             setText(null);
