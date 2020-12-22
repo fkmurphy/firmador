@@ -284,6 +284,13 @@ public class FXMLController implements Initializable {
     @FXML
     public void actionCloseSigner()
     {
+        stage.setOnCloseRequest(new EventHandler<WindowEvent>() {
+            @Override
+            public void handle(WindowEvent t) {
+                Platform.exit();
+                System.exit(0);
+            }
+        });
         stage.close();
     }
 
