@@ -46,6 +46,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import javafx.stage.*;
 import javafx.util.Callback;
+import org.bouncycastle.crypto.io.SignerOutputStream;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.openjfx.backend.BackendConnection;
@@ -82,6 +83,9 @@ public class FXMLController implements Initializable {
      */
     @FXML
     private Button btn_select_file;
+
+    @FXML
+    private CheckBox select_all_files;
     //@FXML
     //private Button btn_firmar;
 
@@ -171,43 +175,6 @@ public class FXMLController implements Initializable {
         //list_files.refresh();
     }
 
-    @FXML
-    void btnTokenInfoAction() {
-        try {
-            Parent root  = FXMLLoader.load(getClass().getClassLoader().getResource("token_info.fxml"));
-            stage.setScene(new Scene(root));
-            stage.show();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    @FXML
-    public void actionCloseSigner()
-    {
-        stage.close();
-    }
-
-    @FXML
-    public void actionOpenAbout()
-    {
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("about.fxml"));
-        Parent root = null;
-        try {
-            root = (Parent) loader.load();
-            Scene scene = new Scene(root);
-            Stage aboutStage = new Stage();
-            aboutStage.initModality(Modality.APPLICATION_MODAL);
-            aboutStage.setTitle("Más información");
-            aboutStage.setScene(scene);
-            aboutStage.setResizable(false);
-            aboutStage.show();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-    }
-
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         //list_files.setItems(listitems);
@@ -217,6 +184,7 @@ public class FXMLController implements Initializable {
         table_files.setItems(listitems);
         tb_description.setCellValueFactory(cd -> new SimpleStringProperty(cd.getValue().getDescriptionFile()));
         actionColumn();
+        table_files.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
         /*listitems.add(
                 new FilesToBeSigned((FileRepository) new SambaConnection())
         );*/
@@ -289,6 +257,64 @@ public class FXMLController implements Initializable {
         } catch (InterruptedException e) {
         }
 
+    }
+
+    /**
+     * ACTIONS
+     */
+
+    /**
+     * Select all files in table
+     */
+    @FXML
+    public void actionSelectAll()
+    {
+        listitems.forEach(element -> {
+            boolean status = false;
+            if (select_all_files.isSelected()) {
+                status = true;
+            }
+            element.setChecked(status);
+        });
+    }
+
+    /**
+     * Close button. Finish application
+     */
+    @FXML
+    public void actionCloseSigner()
+    {
+        stage.setOnCloseRequest(new EventHandler<WindowEvent>() {
+            @Override
+            public void handle(WindowEvent t) {
+                Platform.exit();
+                System.exit(0);
+            }
+        });
+        stage.close();
+    }
+
+
+    /**
+     * Information about
+     */
+    @FXML
+    public void actionOpenAbout()
+    {
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("about.fxml"));
+        Parent root = null;
+        try {
+            root = (Parent) loader.load();
+            Scene scene = new Scene(root);
+            Stage aboutStage = new Stage();
+            aboutStage.initModality(Modality.APPLICATION_MODAL);
+            aboutStage.setTitle("Más información");
+            aboutStage.setScene(scene);
+            aboutStage.setResizable(false);
+            aboutStage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     private void actionColumn(){
