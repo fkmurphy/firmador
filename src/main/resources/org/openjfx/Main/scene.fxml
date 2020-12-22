@@ -29,7 +29,7 @@
          <children>
             <VBox prefHeight="495.0" prefWidth="740.0" HBox.hgrow="SOMETIMES">
                <children>
-                  <CheckBox fx:id="select_all_files" alignment="CENTER" contentDisplay="TOP" focusTraversable="false" mnemonicParsing="false" nodeOrientation="RIGHT_TO_LEFT" onAction="#actionSelectAll" prefHeight="17.0" prefWidth="127.0" text="Seleccionar todo">
+                  <CheckBox fx:id="select_all_files" alignment="CENTER" contentDisplay="TOP" focusTraversable="false" mnemonicParsing="false" nodeOrientation="RIGHT_TO_LEFT" onAction="#actionSelectAll" prefHeight="17.0" prefWidth="155.0" text="Seleccionar todo">
                      <VBox.margin>
                         <Insets bottom="5.0" left="20.0" top="5.0" />
                      </VBox.margin></CheckBox>
@@ -46,7 +46,7 @@
                   </TableView>
                   <ButtonBar buttonMinWidth="50.0" cacheShape="false" centerShape="false" focusTraversable="false" maxHeight="-Infinity" prefHeight="50.0" prefWidth="540.0" scaleShape="false" VBox.vgrow="SOMETIMES">
                      <buttons>
-                        <Button fx:id="closeSigner" alignment="CENTER" maxWidth="20.0" mnemonicParsing="false" onAction="#actionCloseSigner" prefHeight="25.0" text="Cerrar" ButtonBar.buttonData="left" />
+                        <Button fx:id="closeSigner" alignment="CENTER" maxWidth="74.0" mnemonicParsing="false" onAction="#actionCloseSigner" prefHeight="25.0" text="Cerrar" ButtonBar.buttonData="left" />
                         <Button fx:id="btn_select_file" alignment="CENTER" contentDisplay="CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minWidth="-Infinity" mnemonicParsing="false" onAction="#selectFile" prefHeight="26.0" prefWidth="154.0" text="Agregar Archivo" textAlignment="CENTER" wrapText="true">
                   </Button>
                         <PasswordField fx:id="password_token" promptText="Contraseña" />
