@@ -8,6 +8,7 @@ import com.itextpdf.text.pdf.PdfStamper;
 import com.itextpdf.text.pdf.security.*;
 import org.openjfx.Main.Start;
 
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.security.*;
@@ -22,23 +23,67 @@ public class GemaltoToken implements Token {
     protected String driverPath;
     private char[] pwd;
     protected Provider provider;
-    public GemaltoToken(String pwd){
+    public GemaltoToken(String pwd)
+    {
         this.driverPath = "";
         Provider prototype = Security.getProvider("SunPKCS11");
-        this.provider = prototype.configure("--name=eToken\n" +
+
+        this.provider = this.configureProvider(prototype);
+        /*this.provider = prototype.configure("--name=eToken\n" +
                 "library=/lib64/libeToken.so\n" +
-                "slot=0");
+                "slot=0");*/
         this.pwd = pwd.toCharArray();
         Security.addProvider(provider);
     }
+
+    private Provider configureProvider(Provider prototype) {
+        ConfigureProvider providerBundle = new ConfigureProvider();
+        String type = "";
+        if (System.getProperty("os.name").toLowerCase().contains("linux") ||
+                System.getProperty("os.name").toLowerCase().contains("sunos") ||
+                System.getProperty("os.name").toLowerCase().contains("solaris")) {
+            type = "linux";
+        }
+        else if (System.getProperty("os.name").toLowerCase().contains("mac os x"))
+        {
+            type = "mac";
+        } else {
+            type = "windows";
+        }
+
+        ArrayList<String> configs = new ArrayList<String>();
+        ArrayList<LocalProvider> providers = providerBundle.getProviders(type);
+        for (int n = 0; n < providers.size(); n++) {
+            try {
+                File libraryFile = new File(providers.get(n).getLibrary());
+                //System.out.println("Path al archivo: " + libraryFile.getPath());
+                if (libraryFile.exists()) {
+                    //configs.add("--name=" + providers.get(n).getName() + "\nlibrary=" + libraryFile.getPath());
+                    return prototype.configure("--name=" + providers.get(n).getName() + "\nlibrary=" + libraryFile.getPath());
+
+                }
+
+            } catch (Exception e) {
+                e.printStackTrace();
+                System.out.println("cargarConfiguracionProviderToken error: " + e.getMessage());
+                //cargarMensajeDeError("", "cargarConfiguracionProviderToken", e);
+            }
+        }
+        return null;
+    }
+
     private KeyStore getKeystoreInstance(){
         try {
-            KeyStore ks = KeyStore.getInstance("PKCS11", this.provider);
-            ks.load(null, pwd);
+            //KeyStore ks = KeyStore.getInstance("PKCS11", this.provider);
+
+            KeyStore ks = KeyStore.getInstance("PKCS11");
+            ks.load(null,pwd);
+
             return ks;
         } catch (KeyStoreException e) {
             e.printStackTrace();
         } catch (IOException e) {
+            Security.removeProvider(provider.getName());
             System.out.println("Una excepción con el token");
             //e.printStackTrace();
         } catch (Exception e) {
@@ -54,6 +99,7 @@ public class GemaltoToken implements Token {
             if(ks == null)
                 throw new NullPointerException();
             Enumeration<String> aliases = ks.aliases();
+
             if(aliases != null){
                 String alias = aliases.nextElement();
                 cert = (X509Certificate) ks.getCertificate(alias);
@@ -131,12 +177,21 @@ public class GemaltoToken implements Token {
         System.out.println(passwordLine);
         return passwordLine;
     }*/
-    public void sign(String src, String dst){
-        try {
+    public void sign(String src, String dst) throws GeneralSecurityException, DocumentException, IOException {
+        this.signWithPositionStamper(src,dst,40,40); // Dejo como estaba todo antes
+    }
+    public void signWithPositionStamper(String src, String dst, int posX,int posY) throws GeneralSecurityException, DocumentException, IOException {
+        //try {
             KeyStore ks = getKeystoreInstance();
             if(ks == null)
                 throw new NullPointerException();
             Enumeration<String> aliases = ks.aliases();
+            System.out.println("Se imprimen los aliases para obtener cert");
+            while (aliases.hasMoreElements()) {
+                System.out.println(aliases.nextElement());
+            }
+            aliases = ks.aliases();
+            //s.deleteEntry("algo");
             PrivateKey privKey = null;
             Certificate[] chain = null;
             if (aliases != null){
@@ -153,8 +208,17 @@ public class GemaltoToken implements Token {
             // TODO: 6/10/20 excepcion por null
             processSign(src, dst, chain,privKey, DigestAlgorithms.SHA256,
                     getProvider().getName(), MakeSignature.CryptoStandard.CMS,
-                    "-", "Viedma, Río Negro, Argentina");
-        } catch (IOException e) {
+                    "-", "Viedma, Río Negro, Argentina", posX, posY);
+
+            String aliase;
+           /* while (aliases.hasMoreElements()) {
+                aliase = aliases.nextElement();
+
+                System.out.println("Eliminando entry " + aliase);
+                ks.deleteEntry(aliase);
+            }*/
+
+        /*} catch (IOException e) {
             e.printStackTrace();
         }catch (KeyStoreException e) {
             System.out.println("Error keystore");
@@ -171,19 +235,18 @@ public class GemaltoToken implements Token {
         } catch (GeneralSecurityException e) {
             System.out.println("Error general security");
             e.printStackTrace();
-        }
+        }*/
 
     }
 
     public void processSign(String src, String dest,
                             Certificate[] chain, PrivateKey pk, String digestAlgorithm, String provider,
-                            MakeSignature.CryptoStandard subfilter, String reason, String location)
+                            MakeSignature.CryptoStandard subfilter, String reason, String location, int posX, int posY)
             throws GeneralSecurityException, IOException, DocumentException {
 
         // Creating the reader and the stamper
         PdfReader reader = new PdfReader(src);
-        Rectangle lala = reader.getPageSize(reader.getNumberOfPages());
-        System.out.println("size"+lala.toString()+"bottom"+lala.getBottom()+"borderwidh:"+lala.getBorderWidth());
+        //Rectangle lala = reader.getPageSize(reader.getNumberOfPages());
         FileOutputStream os = new FileOutputStream(dest);
         PdfStamper stamper = PdfStamper.createSignature(reader, os, '\0',null,true);
         // Creating the appearance
@@ -191,21 +254,26 @@ public class GemaltoToken implements Token {
         appearance.setReason(reason);
         appearance.setLocation(location);
         //permitir firmado
-        appearance.setCertificationLevel(PdfSignatureAppearance.CERTIFIED_FORM_FILLING);
+        int certLevel = PdfSignatureAppearance.NOT_CERTIFIED;
 
-        System.out.println(LocalDateTime.now().toString());
+        /*if (reader.getAcroFields().getSignatureNames().size() > 0) {
+            certLevel = PdfSignatureAppearance.NOT_CERTIFIED;
+        }*/
+        appearance.setCertificationLevel(certLevel);
+
         int lastPage = reader.getNumberOfPages();
         // 40 = 1cm
         // 40 init x | 40 init y (1cmX x 1cmY)
         // 40+120 | 40 + 40
-        appearance.setVisibleSignature(new Rectangle(40, 40, 40+120, 40+40), lastPage, "sig"+ (new Random()).nextInt(25));
+        appearance.setVisibleSignature(new Rectangle(posX, posY, posX+120, posY+40), lastPage, "sig"+ (new Random()).nextInt(25));
         // Creating the signature
         ExternalDigest digest = new BouncyCastleDigest();
 
         MakeSignature.signDetached(appearance, digest, signature, chain,
                 null, null, null, 0, subfilter);
+
         stamper.close();
-        os.close();
         reader.close();
+        os.close();
     }
 }

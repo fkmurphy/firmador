@@ -1,5 +1,8 @@
 package org.openjfx.backend;
 
+import javafx.animation.PauseTransition;
+import javafx.scene.control.Alert;
+import javafx.stage.Stage;
 import javafx.util.converter.ByteStringConverter;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -40,6 +43,7 @@ public class BackendConnection {
                     .connectTimeout(Duration.ofSeconds(20))
                     .build();
 
+
             token = "Bearer " +  params.get("token");
             url = "http://" + params.get("api_url");
     }
@@ -49,7 +53,7 @@ public class BackendConnection {
      * @param documents
      * @return HttpResponse documents
      */
-    public HttpResponse<String> getRequest(String documents)
+    public HttpResponse<String> getRequest(String documents) throws HttpConnectTimeoutException, ConnectException, IOException, InterruptedException
     {
         HttpRequest request = HttpRequest.newBuilder()
                 .GET()
@@ -65,31 +69,28 @@ public class BackendConnection {
             return response;
         } catch (HttpConnectTimeoutException e) {
             //e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+            throw new HttpConnectTimeoutException("timeout http connect");
+        } catch (ConnectException e) {
+            throw new ConnectException("check network");
 
-        return response;
+        } catch (IOException e) {
+            throw new IOException("-");
+        } catch (InterruptedException e) {
+            throw new InterruptedException(".");
+        }
     }
 
-    public void downloadFile(String document, String dst)
-    {
-        try {
-            URLConnection urlc = new URL(this.url+document).openConnection();
-            urlc.setRequestProperty("Authorization",this.token);
+    public void downloadFile(String document, String dst) throws MalformedURLException, IOException {
+        URLConnection urlc = new URL(this.url+document).openConnection();
+        urlc.setRequestProperty("Authorization",this.token);
 
-            ReadableByteChannel rbc = Channels.newChannel(urlc.getInputStream());
-            FileOutputStream fos = new FileOutputStream(dst);
-            fos.getChannel().transferFrom(rbc,0, Long.MAX_VALUE);
-        } catch (MalformedURLException e) {
-            // TODO: 25/9/20   mensajes
-            e.printStackTrace();
-        } catch (IOException e) {
-            // TODO: 25/9/20 mensajes
-            e.printStackTrace();
-        }
+        ReadableByteChannel rbc = Channels.newChannel(urlc.getInputStream());
+        FileOutputStream fos = new FileOutputStream(dst);
+        fos.getChannel().transferFrom(rbc,0, Long.MAX_VALUE);
+        fos.close();
+        //} catch (MalformedURLException e) {
+        //} catch (IOException e) {
+        //}
     }
 
     public boolean sendFile(String documentPath, int documentId)

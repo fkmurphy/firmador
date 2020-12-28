@@ -2,8 +2,12 @@ package org.openjfx.Main.models;
 
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
-import org.kordamp.ikonli.javafx.FontIcon;
+import javafx.scene.text.Text;
 import org.openjfx.Main.file.FileRepository;
+
+import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
+import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
+import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory;
 
 public class FilesToBeSigned {
     protected FileRepository file;
@@ -63,18 +67,20 @@ public class FilesToBeSigned {
 
     public void setStatus(String status)
     {
-        FontIcon icon;
+
+        Text icon;
         switch (status) {
             case "signed":
-                icon = new FontIcon("fa-check");
+                icon = FontAwesomeIconFactory.get().createIcon(FontAwesomeIcon.CHECK);
                 break;
             case "fail":
-                icon = new FontIcon("fa-close");
+                icon = FontAwesomeIconFactory.get().createIcon(FontAwesomeIcon.CLOSE);
+                break;
             default:
-                icon = new FontIcon("fas-file-signature");
+                icon = FontAwesomeIconFactory.get().createIcon(FontAwesomeIcon.FILE_PDF_ALT);
                 break;
         }
-        icon.setIconSize(15);
+        //icon.setIconSize(15);
         this.signed.setGraphic(icon);
     }
 

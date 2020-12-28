@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Hyperlink?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.AnchorPane?>
+
+
+<AnchorPane prefHeight="300.0" prefWidth="400.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1">
+   <children>
+      <Label alignment="CENTER" contentDisplay="CENTER" layoutX="37.0" layoutY="30.0" prefHeight="27.0" prefWidth="327.0" text="Firmador" />
+      <Hyperlink alignment="CENTER" layoutX="42.0" layoutY="233.0" prefHeight="23.0" prefWidth="318.0" text="Manual de uso" />
+      <Label alignment="CENTER" contentDisplay="CENTER" layoutX="37.0" layoutY="206.0" prefHeight="27.0" prefWidth="327.0" text="Para obtener ayuda:" />
+      <Label alignment="CENTER" contentDisplay="CENTER" layoutX="37.0" layoutY="256.0" prefHeight="27.0" prefWidth="327.0" text="informatica@tribcuentasrionegro.gov.ar" />
+   </children>
+</AnchorPane>
