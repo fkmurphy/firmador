@@ -198,11 +198,11 @@ public class FXMLController implements Initializable {
         HttpResponse<String> response;
         try {
             bk =  BackendConnection.get(mapArgument);
-            response = bk.getRequest("/documents/pending/");
+            response = bk.getRequest("/documents/pending?purpose=1");
             // TODO: 5/10/20 throwable
-            if (response == null || response.statusCode() != 200)
-                return;
-
+            if (response == null || response.statusCode() != 200) {
+                throw new ConnectException("Hubo un problema al pedir los documentos.");
+            }
             JSONArray array = new JSONArray(response.body());
             int id,type,number, year, posX, posY;
             String description;
@@ -240,7 +240,6 @@ public class FXMLController implements Initializable {
                 alert.setTitle("Tiempo de espera agotado");
                 alert.setContentText("Parece que ha tardado demasiado en adquirir los documentos.");
                 alert.showAndWait();*/
-
                 PopupComponent popc = new PopupComponent("Parece que ha tardado demasiado en adquirir los documentos.", stage.getScene().getWindow());
                 popc.showPopup().show(stage.getScene().getWindow());
 
@@ -252,9 +251,16 @@ public class FXMLController implements Initializable {
                 alert.setTitle("¡Error al obtener los documentos!");
                 alert.setContentText("Hubo un problema con la conexión. ERR: #35501");
                 alert.showAndWait();
-
             });
         } catch (InterruptedException e) {
+            Platform.runLater(()-> {
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setHeaderText(null);
+                alert.setTitle("¡Error al obtener los documentos!");
+                alert.setContentText("Hubo un problema con la conexión. ERR: #35502");
+                alert.showAndWait();
+
+            });
         }
 
     }

@@ -19,6 +19,8 @@ dependencies {
     implementation 'org.bouncycastle:bcprov-jdk15on:1.56'
     implementation 'org.bouncycastle:bcpkix-jdk15on:1.56'
     implementation 'org.update4j:update4j:1.5.6'
+    testImplementation("org.junit.jupiter:junit-jupiter-api:5.7.1")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.7.1")
 }
 
 mainClassName = 'org.openjfx.MainApp'
@@ -66,6 +68,13 @@ jlink {
                '--output', "${appPackaging}", '--launcher', "launch=org.openjfx/org.openjfx.Main.Start"
     ]
 }
+
+
+test {
+    useJUnitPlatform()
+    maxHeapSize = '1G'
+}
+
 
 compileJava {
     options.encoding = 'UTF-8'
