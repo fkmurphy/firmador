@@ -200,10 +200,19 @@ public class FXMLController implements Initializable {
             bk =  BackendConnection.get(mapArgument);
             response = bk.getRequest("/documents/pending?purpose=1");
             // TODO: 5/10/20 throwable
-            if (response == null || response.statusCode() != 200) {
+            if (response == null) {
                 throw new ConnectException("Hubo un problema al pedir los documentos.");
             }
-            JSONArray array = new JSONArray(response.body());
+            if (response.statusCode() == 422) {
+                throw new Exception("Verifique que posee documentos para firmar.");
+            }
+            if (response.statusCode() != 200) {
+                throw new Exception("Hubo algún problema al obtener los documentos.");
+            }
+
+            JSONObject objeto = new JSONObject(response.body());
+
+            JSONArray array = objeto.getJSONArray("data");
             int id,type,number, year, posX, posY;
             String description;
             JSONObject json;
@@ -258,6 +267,15 @@ public class FXMLController implements Initializable {
                 alert.setHeaderText(null);
                 alert.setTitle("¡Error al obtener los documentos!");
                 alert.setContentText("Hubo un problema con la conexión. ERR: #35502");
+                alert.showAndWait();
+
+            });
+        } catch (Exception e) {
+            Platform.runLater(()-> {
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setHeaderText(null);
+                alert.setTitle("¡Error al obtener los documentos!");
+                alert.setContentText(e.getMessage());
                 alert.showAndWait();
 
             });
