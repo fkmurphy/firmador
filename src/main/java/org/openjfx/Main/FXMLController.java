@@ -402,9 +402,9 @@ public class FXMLController implements Initializable {
                             btnShowFile.setOnAction(event -> {
                                 FilesToBeSigned file =listitems.get(getIndex());
                                 String path = file.getFilePath();
-                                try {
+                                if (path != null) {
                                     hostServices.showDocument(path);
-                                } catch (Exception e) {
+                                } else {
                                     Platform.runLater(()-> {
                                         PopupComponent popc = new PopupComponent("Hay un problema al obtener el archivo para visualizar.", stage.getScene().getWindow());
                                         popc.showPopup().show(stage.getScene().getWindow());
