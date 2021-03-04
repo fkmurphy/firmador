@@ -168,6 +168,8 @@ public class FXMLController implements Initializable {
     @FXML
     void selectFile(){
         FileChooser fileChooser = new FileChooser();
+        FileChooser.ExtensionFilter extension = new FileChooser.ExtensionFilter("PDF","*.pdf");
+        fileChooser.getExtensionFilters().add(extension);
         fileChooser.setTitle("Elegir un archivo");
         File fileSelected = fileChooser.showOpenDialog(new Stage());
         if (fileSelected != null) {
