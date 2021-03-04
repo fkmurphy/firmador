@@ -405,6 +405,7 @@ public class FXMLController implements Initializable {
                                 if (path != null) {
                                     hostServices.showDocument(path);
                                 } else {
+                                    file.setStatus("fail");
                                     Platform.runLater(()-> {
                                         PopupComponent popc = new PopupComponent("Hay un problema al obtener el archivo para visualizar.", stage.getScene().getWindow());
                                         popc.showPopup().show(stage.getScene().getWindow());
