@@ -129,27 +129,35 @@ public class FXMLController implements Initializable {
 
     @FXML
     void firmarButton() {
-        token = new GemaltoToken(password_token.getText());
+        try {
+            token = new GemaltoToken(password_token.getText());
 
 
-        Iterator<FilesToBeSigned> listFilesSrc = listitems.iterator();
-        FilesToBeSigned fileSrc;
+            Iterator<FilesToBeSigned> listFilesSrc = listitems.iterator();
+            FilesToBeSigned fileSrc;
 
-        while(listFilesSrc.hasNext()){
-            fileSrc = listFilesSrc.next();
-            if (fileSrc.getChecked().isSelected()) {
-                try {
-                    if  (!fileSrc.getFile().sign(token)) {
+            while(listFilesSrc.hasNext()){
+                fileSrc = listFilesSrc.next();
+                if (fileSrc.getChecked().isSelected()) {
+                    try {
+                        if  (!fileSrc.getFile().sign(token)) {
+                            fileSrc.setStatus("fail");
+                        } else {
+                            fileSrc.setStatus("signed");
+                        }
+                        fileSrc.setChecked(false);
+
+                    } catch (Exception e) {
                         fileSrc.setStatus("fail");
-                    } else {
-                        fileSrc.setStatus("signed");
                     }
-                    fileSrc.setChecked(false);
-
-                } catch (Exception e) {
-                    fileSrc.setStatus("fail");
                 }
             }
+        } catch(NullPointerException e) {
+            Platform.runLater(()-> {
+                PopupComponent popc = new PopupComponent("Verifique que el token está conectado.", stage.getScene().getWindow());
+                popc.showPopup().show(stage.getScene().getWindow());
+
+            });
         }
         //String src = org.openjfx.HelloFX.class.getClassLoader().getResource("uno.pdf").getFile();
         //String dest = String.format("/home/jmurphy/hola2.pdf",1);
@@ -207,9 +215,8 @@ public class FXMLController implements Initializable {
                 throw new Exception("Verifique que posee documentos para firmar.");
             }
             if (response.statusCode() != 200) {
-                throw new Exception("Hubo algún problema al obtener los documentos.");
+                throw new Exception("Se ha encontrado un error al obtener los documentos ERR #35503.");
             }
-
             JSONObject objeto = new JSONObject(response.body());
 
             JSONArray array = objeto.getJSONArray("data");
@@ -393,9 +400,17 @@ public class FXMLController implements Initializable {
                                 eyeIcon.setFill(Color.BLACK);
                             });
                             btnShowFile.setOnAction(event -> {
-                                hostServices.showDocument(
-                                        listitems.get(getIndex()).getFilePath()
-                                );
+                                FilesToBeSigned file =listitems.get(getIndex());
+                                String path = file.getFilePath();
+                                try {
+                                    hostServices.showDocument(path);
+                                } catch (Exception e) {
+                                    Platform.runLater(()-> {
+                                        PopupComponent popc = new PopupComponent("Hay un problema al obtener el archivo para visualizar.", stage.getScene().getWindow());
+                                        popc.showPopup().show(stage.getScene().getWindow());
+
+                                    });
+                                }
                             });
 
                             setGraphic(pane);
