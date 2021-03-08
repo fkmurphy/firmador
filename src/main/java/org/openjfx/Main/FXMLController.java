@@ -62,6 +62,7 @@ import java.net.ConnectException;
 import java.net.URL;
 import java.net.http.HttpConnectTimeoutException;
 import java.net.http.HttpResponse;
+import java.security.NoSuchAlgorithmException;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.ResourceBundle;

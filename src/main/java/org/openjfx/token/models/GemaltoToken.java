@@ -72,24 +72,19 @@ public class GemaltoToken implements Token {
         return null;
     }
 
-    private KeyStore getKeystoreInstance(){
-        try {
-            //KeyStore ks = KeyStore.getInstance("PKCS11", this.provider);
+    private KeyStore getKeystoreInstance() throws KeyStoreException, CertificateException, NoSuchAlgorithmException, IOException {
+        //try {
 
-            KeyStore ks = KeyStore.getInstance("PKCS11");
-            ks.load(null,pwd);
+        KeyStore ks = KeyStore.getInstance("PKCS11");
+        ks.load(null,pwd);
 
-            return ks;
-        } catch (KeyStoreException e) {
-            e.printStackTrace();
+        return ks;
+        /*} catch (KeyStoreException e) {
         } catch (IOException e) {
             Security.removeProvider(provider.getName());
-            System.out.println("Una excepción con el token");
-            //e.printStackTrace();
         } catch (Exception e) {
             System.out.println("Other exception");
-        }
-        return null;
+        }*/
     }
 
     private X509Certificate getCert(){
@@ -180,16 +175,16 @@ public class GemaltoToken implements Token {
     public void sign(String src, String dst) throws GeneralSecurityException, DocumentException, IOException {
         this.signWithPositionStamper(src,dst,40,40); // Dejo como estaba todo antes
     }
-    public void signWithPositionStamper(String src, String dst, int posX,int posY) throws GeneralSecurityException, DocumentException, IOException {
+    public void signWithPositionStamper(String src, String dst, int posX,int posY) throws KeyStoreException, UnrecoverableKeyException, NoSuchAlgorithmException {
         //try {
             KeyStore ks = getKeystoreInstance();
             if(ks == null)
                 throw new NullPointerException();
             Enumeration<String> aliases = ks.aliases();
             System.out.println("Se imprimen los aliases para obtener cert");
-            while (aliases.hasMoreElements()) {
+            /*while (aliases.hasMoreElements()) {
                 System.out.println(aliases.nextElement());
-            }
+            }*/
             aliases = ks.aliases();
             //s.deleteEntry("algo");
             PrivateKey privKey = null;
