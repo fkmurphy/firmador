@@ -144,8 +144,8 @@ public class FXMLController implements Initializable {
                         fileSrc.setChecked(false);
 
                     } catch (Exception e) {
-                        System.out.println(e);
                         fileSrc.setStatus("fail");
+                        LOGGER.warning("Hubo un problema al firmar el archivo. " + e.getMessage());
                     }
                 }
             }
@@ -153,8 +153,8 @@ public class FXMLController implements Initializable {
             Platform.runLater(()-> {
                 PopupComponent popc = new PopupComponent("Verifique que el token está conectado.", stage.getScene().getWindow());
                 popc.showPopup().show(stage.getScene().getWindow());
-
             });
+            LOGGER.warning("Hubo un problema al firmar un archivo.  :::exception_message:" + e.getMessage());
         }
         //String src = org.openjfx.HelloFX.class.getClassLoader().getResource("uno.pdf").getFile();
         //String dest = String.format("/home/jmurphy/hola2.pdf",1);
@@ -164,7 +164,7 @@ public class FXMLController implements Initializable {
 
     @FXML
     void selectFile() {
-        LOGGER.infoLog("PQWPEQOWEOQW");
+
         FileChooser fileChooser = new FileChooser();
         FileChooser.ExtensionFilter extension = new FileChooser.ExtensionFilter("PDF","*.pdf");
         fileChooser.getExtensionFilters().add(extension);
@@ -209,12 +209,20 @@ public class FXMLController implements Initializable {
             response = bk.getRequest("/documents/pending?purpose=1");
             // TODO: 5/10/20 throwable
             if (response == null) {
+                LOGGER.warning("No hay respuesta desde el backend.");
                 throw new ConnectException("Hubo un problema al pedir los documentos.");
             }
             if (response.statusCode() == 422) {
+                LOGGER.warning("ERROR 422 del backend. :::response:" + response.body());
                 throw new Exception("Verifique que posee documentos para firmar.");
             }
             if (response.statusCode() != 200) {
+                LOGGER.warning(
+                        "ERROR respuesta backend. :::response:"
+                                + response.body()
+                                + " :::statusResponse:"
+                                + response.statusCode()
+                );
                 throw new Exception("Se ha encontrado un error al obtener los documentos ERR #35503.");
             }
             JSONObject objeto = new JSONObject(response.body());
@@ -237,19 +245,14 @@ public class FXMLController implements Initializable {
                 listitems.add( new FilesToBeSigned(ll));
             }
         } catch (ConnectException e) {
-
+            LOGGER.warning("Error de conexión con backend :::response:" + e.getMessage());
             Platform.runLater(()->{
-                /*Alert alert = new Alert(Alert.AlertType.ERROR);
-                alert.setHeaderText(null);
-                alert.setTitle("Error al conectarse.");
-                alert.setContentText("verifique que tiene acceso a internet.");
-                alert.showAndWait();*/
                 PopupComponent popc = new PopupComponent("Parece que ha tardado demasiado en adquirir los documentos.", stage.getScene().getWindow());
                 popc.showPopup().show(stage.getScene().getWindow());
-
             });
 
         } catch (HttpConnectTimeoutException e) {
+            LOGGER.warning("Error - timeout con backend :::response:" + e.getMessage());
             Platform.runLater(()-> {
                 /*Alert alert = new Alert(Alert.AlertType.ERROR);
                 alert.setHeaderText(null);
@@ -261,6 +264,7 @@ public class FXMLController implements Initializable {
 
             });
         } catch (IOException e) {
+            LOGGER.warning("Error al intentar leer los documentos recibidos desde backend. ERR:#35501 :::response:" + e.getMessage());
             Platform.runLater(()-> {
                 Alert alert = new Alert(Alert.AlertType.ERROR);
                 alert.setHeaderText(null);
@@ -269,6 +273,7 @@ public class FXMLController implements Initializable {
                 alert.showAndWait();
             });
         } catch (InterruptedException e) {
+            LOGGER.warning("Error - problema con el backend ERR:#35502 :::response:" + e.getMessage());
             Platform.runLater(()-> {
                 Alert alert = new Alert(Alert.AlertType.ERROR);
                 alert.setHeaderText(null);
@@ -278,6 +283,7 @@ public class FXMLController implements Initializable {
 
             });
         } catch (Exception e) {
+            LOGGER.warning("ERROR con backend al obtener documentos. No se puede deducir la causa del error. :::response:" + e.getMessage());
             Platform.runLater(()-> {
                 Alert alert = new Alert(Alert.AlertType.ERROR);
                 alert.setHeaderText(null);
@@ -405,6 +411,7 @@ public class FXMLController implements Initializable {
                                 if (path != null) {
                                     hostServices.showDocument(path);
                                 } else {
+                                    LOGGER.warning("Error al intentar mostrar el documento. :::file_class:" + file.getClass());
                                     file.setStatus("fail");
                                     Platform.runLater(()-> {
                                         PopupComponent popc = new PopupComponent("Hay un problema al obtener el archivo para visualizar.", stage.getScene().getWindow());
