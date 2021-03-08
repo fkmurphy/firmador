@@ -149,6 +149,7 @@ public class FXMLController implements Initializable {
                         fileSrc.setChecked(false);
 
                     } catch (Exception e) {
+                        System.out.println(e);
                         fileSrc.setStatus("fail");
                     }
                 }

@@ -34,6 +34,7 @@ public class GemaltoToken implements Token {
                 "slot=0");*/
         this.pwd = pwd.toCharArray();
         Security.addProvider(provider);
+        System.out.println("agregue");
     }
 
     private Provider configureProvider(Provider prototype) {
@@ -74,10 +75,12 @@ public class GemaltoToken implements Token {
 
     private KeyStore getKeystoreInstance() throws KeyStoreException, CertificateException, NoSuchAlgorithmException, IOException {
         //try {
-
+        System.out.println("a ver la instance");
         KeyStore ks = KeyStore.getInstance("PKCS11");
+        System.out.println("cargo pass");
         ks.load(null,pwd);
 
+        System.out.println("to ok");
         return ks;
         /*} catch (KeyStoreException e) {
         } catch (IOException e) {
@@ -147,46 +150,17 @@ public class GemaltoToken implements Token {
         return ((to - now) / TICKS_POR_DIA);
     }
 
-    public Boolean checkValidity() throws CertificateException, NoSuchAlgorithmException, KeyStoreException, IOException {
-        //try {
-            X509Certificate cert = getCert();
-            //Signature s = Signature.getInstance("SHA1withRSA");
-            //s.initVerify(keystore.getCertificate(alias));
-            cert.checkValidity();
-            System.out.println("Validation check passed.");
-            return true;
-        /*} catch (CertificateExpiredException e) {
-            System.out.println("Certificate expired. Abroting.");
-        } catch (CertificateNotYetValidException e){
-            System.out.println("Certificate invalid. Abroting.");
-        }
-        return false;*/
-    }
-
-    /*
-    private static String getPassword() throws IOException {
-        Servitring file = Main.class.getClassLoader().getResource("password.txt").getFile();
-        FileReader reader = new FileReader(file);
-        BufferedReader br = new BufferedReader(reader);
-        String passwordLine = br.readLine();
-        System.out.println(passwordLine);
-        return passwordLine;
-    }*/
     public void sign(String src, String dst) throws GeneralSecurityException, DocumentException, IOException {
         this.signWithPositionStamper(src,dst,40,40); // Dejo como estaba todo antes
     }
     public void signWithPositionStamper(String src, String dst, int posX,int posY) throws GeneralSecurityException, IOException, DocumentException {
-        //try {
             KeyStore ks = getKeystoreInstance();
             if(ks == null)
                 throw new NullPointerException();
             Enumeration<String> aliases = ks.aliases();
             System.out.println("Se imprimen los aliases para obtener cert");
-            /*while (aliases.hasMoreElements()) {
-                System.out.println(aliases.nextElement());
-            }*/
+
             aliases = ks.aliases();
-            //s.deleteEntry("algo");
             PrivateKey privKey = null;
             Certificate[] chain = null;
             if (aliases != null){
