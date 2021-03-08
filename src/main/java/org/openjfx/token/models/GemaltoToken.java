@@ -41,11 +41,12 @@ public class GemaltoToken implements Token {
         String type = "";
         if (System.getProperty("os.name").toLowerCase().contains("linux") ||
                 System.getProperty("os.name").toLowerCase().contains("sunos") ||
-                System.getProperty("os.name").toLowerCase().contains("solaris")) {
+                System.getProperty("os.name").toLowerCase().contains("solaris")
+        ) {
             type = "linux";
-        }
-        else if (System.getProperty("os.name").toLowerCase().contains("mac os x"))
-        {
+        } else if (
+                System.getProperty("os.name").toLowerCase().contains("mac os x")
+        ) {
             type = "mac";
         } else {
             type = "windows";
