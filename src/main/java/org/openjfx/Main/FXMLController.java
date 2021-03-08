@@ -20,12 +20,9 @@ public class FXMLController implements Initializable {
     }
 }
 */
-import javafx.animation.PauseTransition;
+
 import javafx.application.HostServices;
 import javafx.application.Platform;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
-import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.layout.HBox;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
@@ -40,21 +37,18 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.layout.Region;
-import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import javafx.stage.*;
 import javafx.util.Callback;
-import org.bouncycastle.crypto.io.SignerOutputStream;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.openjfx.backend.BackendConnection;
 import org.openjfx.Main.file.LocalPDF;
 import org.openjfx.Main.file.WorkflowFile;
 import org.openjfx.Main.models.FilesToBeSigned;
-import org.openjfx.components.Notification;
 import org.openjfx.components.PopupComponent;
+import org.openjfx.infrastructure.Log;
 import org.openjfx.token.models.GemaltoToken;
 
 import java.io.*;
@@ -62,7 +56,6 @@ import java.net.ConnectException;
 import java.net.URL;
 import java.net.http.HttpConnectTimeoutException;
 import java.net.http.HttpResponse;
-import java.security.NoSuchAlgorithmException;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.ResourceBundle;
@@ -104,6 +97,8 @@ public class FXMLController implements Initializable {
     private TableColumn<FilesToBeSigned, String> tb_description;
     @FXML
     private TableColumn<FilesToBeSigned,Button> tb_status_sign;
+
+    private final static Log LOGGER = new Log();
 
     Stage stage;
 
@@ -168,7 +163,8 @@ public class FXMLController implements Initializable {
 
 
     @FXML
-    void selectFile(){
+    void selectFile() {
+        LOGGER.infoLog("PQWPEQOWEOQW");
         FileChooser fileChooser = new FileChooser();
         FileChooser.ExtensionFilter extension = new FileChooser.ExtensionFilter("PDF","*.pdf");
         fileChooser.getExtensionFilters().add(extension);

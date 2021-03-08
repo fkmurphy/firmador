@@ -10,6 +10,7 @@ module org.openjfx {
     requires jcifs;
     requires de.jensd.fx.glyphs.fontawesome;
     requires org.update4j;
+    requires java.logging;
 
 
     opens org.openjfx.Main.models to javafx.base;

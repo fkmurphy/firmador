@@ -27,14 +27,13 @@ public class GemaltoToken implements Token {
     {
         this.driverPath = "";
         Provider prototype = Security.getProvider("SunPKCS11");
-
         this.provider = this.configureProvider(prototype);
+
         /*this.provider = prototype.configure("--name=eToken\n" +
                 "library=/lib64/libeToken.so\n" +
                 "slot=0");*/
         this.pwd = pwd.toCharArray();
         Security.addProvider(provider);
-        System.out.println("agregue");
     }
 
     private Provider configureProvider(Provider prototype) {
@@ -61,7 +60,6 @@ public class GemaltoToken implements Token {
                 if (libraryFile.exists()) {
                     //configs.add("--name=" + providers.get(n).getName() + "\nlibrary=" + libraryFile.getPath());
                     return prototype.configure("--name=" + providers.get(n).getName() + "\nlibrary=" + libraryFile.getPath());
-
                 }
 
             } catch (Exception e) {
@@ -75,12 +73,9 @@ public class GemaltoToken implements Token {
 
     private KeyStore getKeystoreInstance() throws KeyStoreException, CertificateException, NoSuchAlgorithmException, IOException {
         //try {
-        System.out.println("a ver la instance");
         KeyStore ks = KeyStore.getInstance("PKCS11");
-        System.out.println("cargo pass");
         ks.load(null,pwd);
 
-        System.out.println("to ok");
         return ks;
         /*} catch (KeyStoreException e) {
         } catch (IOException e) {
