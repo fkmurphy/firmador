@@ -6,3 +6,4 @@
 /src/main/resources/org/openjfx/smb.cfg
 /config.properties
 /*.log
+/*.log.*

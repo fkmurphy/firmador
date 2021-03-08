@@ -7,6 +7,7 @@ import com.itextpdf.text.pdf.PdfSignatureAppearance;
 import com.itextpdf.text.pdf.PdfStamper;
 import com.itextpdf.text.pdf.security.*;
 import org.openjfx.Main.Start;
+import org.openjfx.infrastructure.Log;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -18,11 +19,14 @@ import java.time.LocalDateTime;
 import java.util.*;
 
 public class GemaltoToken implements Token {
+
     private static final long TICKS_POR_DIA = 1000 * 60 * 60 * 24;
+    private final static Log LOGGER = new Log();
     protected ExternalSignature signature =null;
     protected String driverPath;
     private char[] pwd;
     protected Provider provider;
+
     public GemaltoToken(String pwd)
     {
         this.driverPath = "";
@@ -64,8 +68,10 @@ public class GemaltoToken implements Token {
                 }
 
             } catch (Exception e) {
-                e.printStackTrace();
-                System.out.println("cargarConfiguracionProviderToken error: " + e.getMessage());
+                //e.printStackTrace();
+                //System.out.println("cargarConfiguracionProviderToken error: " + e.getMessage());
+                LOGGER.warning("ERROR al obtener el driver del token. Posiblemente no se encuentre el archivo. :::response:" + e.getMessage());
+
                 //cargarMensajeDeError("", "cargarConfiguracionProviderToken", e);
             }
         }
@@ -100,6 +106,7 @@ public class GemaltoToken implements Token {
         }
 
         if (cert == null) {
+            LOGGER.warning("ERROR al obtener el driver del token. Posiblemente no se encuentre el archivo.");
             throw new CertificateException("Certificado no encontrado.");
         }
 
@@ -151,10 +158,12 @@ public class GemaltoToken implements Token {
     }
     public void signWithPositionStamper(String src, String dst, int posX,int posY) throws GeneralSecurityException, IOException, DocumentException {
             KeyStore ks = getKeystoreInstance();
-            if(ks == null)
+            if(ks == null){
+                LOGGER.warning("ERROR, no se puede firmar porque no se encuentra la clave del token.");
                 throw new NullPointerException();
+            }
+
             Enumeration<String> aliases = ks.aliases();
-            System.out.println("Se imprimen los aliases para obtener cert");
 
             aliases = ks.aliases();
             PrivateKey privKey = null;
