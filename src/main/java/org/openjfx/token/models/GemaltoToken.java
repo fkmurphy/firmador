@@ -87,32 +87,34 @@ public class GemaltoToken implements Token {
         }*/
     }
 
-    private X509Certificate getCert(){
+    private X509Certificate getCert() throws CertificateException, NoSuchAlgorithmException, KeyStoreException, IOException {
         X509Certificate cert = null;
-        try {
-            KeyStore ks = getKeystoreInstance();
-            if(ks == null)
-                throw new NullPointerException();
-            Enumeration<String> aliases = ks.aliases();
+        //try {
+        KeyStore ks = getKeystoreInstance();
+        if(ks == null)
+            throw new NullPointerException();
+        Enumeration<String> aliases = ks.aliases();
 
-            if(aliases != null){
-                String alias = aliases.nextElement();
-                cert = (X509Certificate) ks.getCertificate(alias);
-            }
-            // TODO: 6/10/20 exception if null
-            //get Cert
+        if(aliases != null){
+            String alias = aliases.nextElement();
+            cert = (X509Certificate) ks.getCertificate(alias);
+        }
 
-        } catch (KeyStoreException e) {
+        if (cert == null) {
+            throw new CertificateException("Certificado no encontrado.");
+        }
+
+       /* } catch (KeyStoreException e) {
             e.printStackTrace();
         } catch (NullPointerException p) {
             System.out.println("null");
             p.printStackTrace();
-        }
+        }*/
         return cert;
     }
 
     @Override
-    public Map<String,String> getInfo() {
+    public Map<String,String> getInfo() throws CertificateException, NoSuchAlgorithmException, KeyStoreException, IOException {
         Map<String,String> map = new HashMap<>();
         X509Certificate cert = getCert();
         map.put("issuer",cert.getIssuerDN().toString());
@@ -145,22 +147,20 @@ public class GemaltoToken implements Token {
         return ((to - now) / TICKS_POR_DIA);
     }
 
-    public Boolean checkValidity(){
-        try {
+    public Boolean checkValidity() throws CertificateException, NoSuchAlgorithmException, KeyStoreException, IOException {
+        //try {
             X509Certificate cert = getCert();
             //Signature s = Signature.getInstance("SHA1withRSA");
             //s.initVerify(keystore.getCertificate(alias));
             cert.checkValidity();
             System.out.println("Validation check passed.");
             return true;
-        } catch (CertificateExpiredException e) {
+        /*} catch (CertificateExpiredException e) {
             System.out.println("Certificate expired. Abroting.");
-            //System.exit(1);
         } catch (CertificateNotYetValidException e){
             System.out.println("Certificate invalid. Abroting.");
-            //System.exit(1);
         }
-        return false;
+        return false;*/
     }
 
     /*
@@ -175,7 +175,7 @@ public class GemaltoToken implements Token {
     public void sign(String src, String dst) throws GeneralSecurityException, DocumentException, IOException {
         this.signWithPositionStamper(src,dst,40,40); // Dejo como estaba todo antes
     }
-    public void signWithPositionStamper(String src, String dst, int posX,int posY) throws KeyStoreException, UnrecoverableKeyException, NoSuchAlgorithmException {
+    public void signWithPositionStamper(String src, String dst, int posX,int posY) throws GeneralSecurityException, IOException, DocumentException {
         //try {
             KeyStore ks = getKeystoreInstance();
             if(ks == null)
