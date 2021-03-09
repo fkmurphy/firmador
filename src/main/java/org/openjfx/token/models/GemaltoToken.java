@@ -7,6 +7,7 @@ import com.itextpdf.text.pdf.PdfSignatureAppearance;
 import com.itextpdf.text.pdf.PdfStamper;
 import com.itextpdf.text.pdf.security.*;
 import org.openjfx.Main.Start;
+import org.openjfx.infrastructure.Log;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -18,17 +19,20 @@ import java.time.LocalDateTime;
 import java.util.*;
 
 public class GemaltoToken implements Token {
+
     private static final long TICKS_POR_DIA = 1000 * 60 * 60 * 24;
+    private final static Log LOGGER = new Log();
     protected ExternalSignature signature =null;
     protected String driverPath;
     private char[] pwd;
     protected Provider provider;
+
     public GemaltoToken(String pwd)
     {
         this.driverPath = "";
         Provider prototype = Security.getProvider("SunPKCS11");
-
         this.provider = this.configureProvider(prototype);
+
         /*this.provider = prototype.configure("--name=eToken\n" +
                 "library=/lib64/libeToken.so\n" +
                 "slot=0");*/
@@ -41,11 +45,12 @@ public class GemaltoToken implements Token {
         String type = "";
         if (System.getProperty("os.name").toLowerCase().contains("linux") ||
                 System.getProperty("os.name").toLowerCase().contains("sunos") ||
-                System.getProperty("os.name").toLowerCase().contains("solaris")) {
+                System.getProperty("os.name").toLowerCase().contains("solaris")
+        ) {
             type = "linux";
-        }
-        else if (System.getProperty("os.name").toLowerCase().contains("mac os x"))
-        {
+        } else if (
+                System.getProperty("os.name").toLowerCase().contains("mac os x")
+        ) {
             type = "mac";
         } else {
             type = "windows";
@@ -60,64 +65,62 @@ public class GemaltoToken implements Token {
                 if (libraryFile.exists()) {
                     //configs.add("--name=" + providers.get(n).getName() + "\nlibrary=" + libraryFile.getPath());
                     return prototype.configure("--name=" + providers.get(n).getName() + "\nlibrary=" + libraryFile.getPath());
-
                 }
 
             } catch (Exception e) {
-                e.printStackTrace();
-                System.out.println("cargarConfiguracionProviderToken error: " + e.getMessage());
+                //e.printStackTrace();
+                //System.out.println("cargarConfiguracionProviderToken error: " + e.getMessage());
+                LOGGER.warning("ERROR al obtener el driver del token. Posiblemente no se encuentre el archivo. :::response:" + e.getMessage());
+
                 //cargarMensajeDeError("", "cargarConfiguracionProviderToken", e);
             }
         }
         return null;
     }
 
-    private KeyStore getKeystoreInstance(){
-        try {
-            //KeyStore ks = KeyStore.getInstance("PKCS11", this.provider);
+    private KeyStore getKeystoreInstance() throws KeyStoreException, CertificateException, NoSuchAlgorithmException, IOException {
+        //try {
+        KeyStore ks = KeyStore.getInstance("PKCS11");
+        ks.load(null,pwd);
 
-            KeyStore ks = KeyStore.getInstance("PKCS11");
-            ks.load(null,pwd);
-
-            return ks;
-        } catch (KeyStoreException e) {
-            e.printStackTrace();
+        return ks;
+        /*} catch (KeyStoreException e) {
         } catch (IOException e) {
             Security.removeProvider(provider.getName());
-            System.out.println("Una excepción con el token");
-            //e.printStackTrace();
         } catch (Exception e) {
             System.out.println("Other exception");
-        }
-        return null;
+        }*/
     }
 
-    private X509Certificate getCert(){
+    private X509Certificate getCert() throws CertificateException, NoSuchAlgorithmException, KeyStoreException, IOException {
         X509Certificate cert = null;
-        try {
-            KeyStore ks = getKeystoreInstance();
-            if(ks == null)
-                throw new NullPointerException();
-            Enumeration<String> aliases = ks.aliases();
+        //try {
+        KeyStore ks = getKeystoreInstance();
+        if(ks == null)
+            throw new NullPointerException();
+        Enumeration<String> aliases = ks.aliases();
 
-            if(aliases != null){
-                String alias = aliases.nextElement();
-                cert = (X509Certificate) ks.getCertificate(alias);
-            }
-            // TODO: 6/10/20 exception if null
-            //get Cert
+        if(aliases != null){
+            String alias = aliases.nextElement();
+            cert = (X509Certificate) ks.getCertificate(alias);
+        }
 
-        } catch (KeyStoreException e) {
+        if (cert == null) {
+            LOGGER.warning("ERROR al obtener el driver del token. Posiblemente no se encuentre el archivo.");
+            throw new CertificateException("Certificado no encontrado.");
+        }
+
+       /* } catch (KeyStoreException e) {
             e.printStackTrace();
         } catch (NullPointerException p) {
             System.out.println("null");
             p.printStackTrace();
-        }
+        }*/
         return cert;
     }
 
     @Override
-    public Map<String,String> getInfo() {
+    public Map<String,String> getInfo() throws CertificateException, NoSuchAlgorithmException, KeyStoreException, IOException {
         Map<String,String> map = new HashMap<>();
         X509Certificate cert = getCert();
         map.put("issuer",cert.getIssuerDN().toString());
@@ -150,48 +153,19 @@ public class GemaltoToken implements Token {
         return ((to - now) / TICKS_POR_DIA);
     }
 
-    public Boolean checkValidity(){
-        try {
-            X509Certificate cert = getCert();
-            //Signature s = Signature.getInstance("SHA1withRSA");
-            //s.initVerify(keystore.getCertificate(alias));
-            cert.checkValidity();
-            System.out.println("Validation check passed.");
-            return true;
-        } catch (CertificateExpiredException e) {
-            System.out.println("Certificate expired. Abroting.");
-            //System.exit(1);
-        } catch (CertificateNotYetValidException e){
-            System.out.println("Certificate invalid. Abroting.");
-            //System.exit(1);
-        }
-        return false;
-    }
-
-    /*
-    private static String getPassword() throws IOException {
-        Servitring file = Main.class.getClassLoader().getResource("password.txt").getFile();
-        FileReader reader = new FileReader(file);
-        BufferedReader br = new BufferedReader(reader);
-        String passwordLine = br.readLine();
-        System.out.println(passwordLine);
-        return passwordLine;
-    }*/
     public void sign(String src, String dst) throws GeneralSecurityException, DocumentException, IOException {
         this.signWithPositionStamper(src,dst,40,40); // Dejo como estaba todo antes
     }
-    public void signWithPositionStamper(String src, String dst, int posX,int posY) throws GeneralSecurityException, DocumentException, IOException {
-        //try {
+    public void signWithPositionStamper(String src, String dst, int posX,int posY) throws GeneralSecurityException, IOException, DocumentException {
             KeyStore ks = getKeystoreInstance();
-            if(ks == null)
+            if(ks == null){
+                LOGGER.warning("ERROR, no se puede firmar porque no se encuentra la clave del token.");
                 throw new NullPointerException();
-            Enumeration<String> aliases = ks.aliases();
-            System.out.println("Se imprimen los aliases para obtener cert");
-            while (aliases.hasMoreElements()) {
-                System.out.println(aliases.nextElement());
             }
+
+            Enumeration<String> aliases = ks.aliases();
+
             aliases = ks.aliases();
-            //s.deleteEntry("algo");
             PrivateKey privKey = null;
             Certificate[] chain = null;
             if (aliases != null){

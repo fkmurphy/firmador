@@ -20,12 +20,9 @@ public class FXMLController implements Initializable {
     }
 }
 */
-import javafx.animation.PauseTransition;
+
 import javafx.application.HostServices;
 import javafx.application.Platform;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
-import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.layout.HBox;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
@@ -40,21 +37,18 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.layout.Region;
-import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import javafx.stage.*;
 import javafx.util.Callback;
-import org.bouncycastle.crypto.io.SignerOutputStream;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.openjfx.backend.BackendConnection;
 import org.openjfx.Main.file.LocalPDF;
 import org.openjfx.Main.file.WorkflowFile;
 import org.openjfx.Main.models.FilesToBeSigned;
-import org.openjfx.components.Notification;
 import org.openjfx.components.PopupComponent;
+import org.openjfx.infrastructure.Log;
 import org.openjfx.token.models.GemaltoToken;
 
 import java.io.*;
@@ -104,6 +98,8 @@ public class FXMLController implements Initializable {
     @FXML
     private TableColumn<FilesToBeSigned,Button> tb_status_sign;
 
+    private final static Log LOGGER = new Log();
+
     Stage stage;
 
     GemaltoToken token = null;
@@ -129,27 +125,36 @@ public class FXMLController implements Initializable {
 
     @FXML
     void firmarButton() {
-        token = new GemaltoToken(password_token.getText());
+        try {
+            token = new GemaltoToken(password_token.getText());
 
 
-        Iterator<FilesToBeSigned> listFilesSrc = listitems.iterator();
-        FilesToBeSigned fileSrc;
+            Iterator<FilesToBeSigned> listFilesSrc = listitems.iterator();
+            FilesToBeSigned fileSrc;
 
-        while(listFilesSrc.hasNext()){
-            fileSrc = listFilesSrc.next();
-            if (fileSrc.getChecked().isSelected()) {
-                try {
-                    if  (!fileSrc.getFile().sign(token)) {
+            while(listFilesSrc.hasNext()){
+                fileSrc = listFilesSrc.next();
+                if (fileSrc.getChecked().isSelected()) {
+                    try {
+                        if  (!fileSrc.getFile().sign(token)) {
+                            fileSrc.setStatus("fail");
+                        } else {
+                            fileSrc.setStatus("signed");
+                        }
+                        fileSrc.setChecked(false);
+
+                    } catch (Exception e) {
                         fileSrc.setStatus("fail");
-                    } else {
-                        fileSrc.setStatus("signed");
+                        LOGGER.warning("Hubo un problema al firmar el archivo. " + e.getMessage());
                     }
-                    fileSrc.setChecked(false);
-
-                } catch (Exception e) {
-                    fileSrc.setStatus("fail");
                 }
             }
+        } catch(NullPointerException e) {
+            Platform.runLater(()-> {
+                PopupComponent popc = new PopupComponent("Verifique que el token está conectado.", stage.getScene().getWindow());
+                popc.showPopup().show(stage.getScene().getWindow());
+            });
+            LOGGER.warning("Hubo un problema al firmar un archivo.  :::exception_message:" + e.getMessage());
         }
         //String src = org.openjfx.HelloFX.class.getClassLoader().getResource("uno.pdf").getFile();
         //String dest = String.format("/home/jmurphy/hola2.pdf",1);
@@ -158,8 +163,11 @@ public class FXMLController implements Initializable {
 
 
     @FXML
-    void selectFile(){
+    void selectFile() {
+
         FileChooser fileChooser = new FileChooser();
+        FileChooser.ExtensionFilter extension = new FileChooser.ExtensionFilter("PDF","*.pdf");
+        fileChooser.getExtensionFilters().add(extension);
         fileChooser.setTitle("Elegir un archivo");
         File fileSelected = fileChooser.showOpenDialog(new Stage());
         if (fileSelected != null) {
@@ -201,15 +209,22 @@ public class FXMLController implements Initializable {
             response = bk.getRequest("/documents/pending?purpose=1");
             // TODO: 5/10/20 throwable
             if (response == null) {
+                LOGGER.warning("No hay respuesta desde el backend.");
                 throw new ConnectException("Hubo un problema al pedir los documentos.");
             }
             if (response.statusCode() == 422) {
+                LOGGER.warning("ERROR 422 del backend. :::response:" + response.body());
                 throw new Exception("Verifique que posee documentos para firmar.");
             }
             if (response.statusCode() != 200) {
-                throw new Exception("Hubo algún problema al obtener los documentos.");
+                LOGGER.warning(
+                        "ERROR respuesta backend. :::response:"
+                                + response.body()
+                                + " :::statusResponse:"
+                                + response.statusCode()
+                );
+                throw new Exception("Se ha encontrado un error al obtener los documentos ERR #35503.");
             }
-
             JSONObject objeto = new JSONObject(response.body());
 
             JSONArray array = objeto.getJSONArray("data");
@@ -230,19 +245,14 @@ public class FXMLController implements Initializable {
                 listitems.add( new FilesToBeSigned(ll));
             }
         } catch (ConnectException e) {
-
+            LOGGER.warning("Error de conexión con backend :::response:" + e.getMessage());
             Platform.runLater(()->{
-                /*Alert alert = new Alert(Alert.AlertType.ERROR);
-                alert.setHeaderText(null);
-                alert.setTitle("Error al conectarse.");
-                alert.setContentText("verifique que tiene acceso a internet.");
-                alert.showAndWait();*/
                 PopupComponent popc = new PopupComponent("Parece que ha tardado demasiado en adquirir los documentos.", stage.getScene().getWindow());
                 popc.showPopup().show(stage.getScene().getWindow());
-
             });
 
         } catch (HttpConnectTimeoutException e) {
+            LOGGER.warning("Error - timeout con backend :::response:" + e.getMessage());
             Platform.runLater(()-> {
                 /*Alert alert = new Alert(Alert.AlertType.ERROR);
                 alert.setHeaderText(null);
@@ -254,6 +264,7 @@ public class FXMLController implements Initializable {
 
             });
         } catch (IOException e) {
+            LOGGER.warning("Error al intentar leer los documentos recibidos desde backend. ERR:#35501 :::response:" + e.getMessage());
             Platform.runLater(()-> {
                 Alert alert = new Alert(Alert.AlertType.ERROR);
                 alert.setHeaderText(null);
@@ -262,6 +273,7 @@ public class FXMLController implements Initializable {
                 alert.showAndWait();
             });
         } catch (InterruptedException e) {
+            LOGGER.warning("Error - problema con el backend ERR:#35502 :::response:" + e.getMessage());
             Platform.runLater(()-> {
                 Alert alert = new Alert(Alert.AlertType.ERROR);
                 alert.setHeaderText(null);
@@ -271,6 +283,7 @@ public class FXMLController implements Initializable {
 
             });
         } catch (Exception e) {
+            LOGGER.warning("ERROR con backend al obtener documentos. No se puede deducir la causa del error. :::response:" + e.getMessage());
             Platform.runLater(()-> {
                 Alert alert = new Alert(Alert.AlertType.ERROR);
                 alert.setHeaderText(null);
@@ -393,9 +406,19 @@ public class FXMLController implements Initializable {
                                 eyeIcon.setFill(Color.BLACK);
                             });
                             btnShowFile.setOnAction(event -> {
-                                hostServices.showDocument(
-                                        listitems.get(getIndex()).getFilePath()
-                                );
+                                FilesToBeSigned file =listitems.get(getIndex());
+                                String path = file.getFilePath();
+                                if (path != null) {
+                                    hostServices.showDocument(path);
+                                } else {
+                                    LOGGER.warning("Error al intentar mostrar el documento. :::file_class:" + file.getClass());
+                                    file.setStatus("fail");
+                                    Platform.runLater(()-> {
+                                        PopupComponent popc = new PopupComponent("Hay un problema al obtener el archivo para visualizar.", stage.getScene().getWindow());
+                                        popc.showPopup().show(stage.getScene().getWindow());
+
+                                    });
+                                }
                             });
 
                             setGraphic(pane);
