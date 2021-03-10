@@ -25,23 +25,28 @@ public class Log {
     }
 
     private void init () {
-        Handler consoleHandler = new ConsoleHandler();
-        Handler fileHandler = null;
+
         try {
-            fileHandler = new FileHandler(fileLogger, true);
+            Handler[] loggerHandlers = LOGGER.getHandlers();
+            if (loggerHandlers.length < 1 || !(loggerHandlers[0] instanceof FileHandler)) {
+                Handler consoleHandler = new ConsoleHandler();
+                Handler fileHandler = null;
+                fileHandler = new FileHandler(fileLogger, true);
 
+                //present data
+                SimpleFormatter simpleFormatter = new SimpleFormatter();
+                fileHandler.setFormatter(simpleFormatter);
 
-            //present data
-            SimpleFormatter simpleFormatter = new SimpleFormatter();
-            fileHandler.setFormatter(simpleFormatter);
+                //get all messages
 
-            //get all messages
-            LOGGER.addHandler(consoleHandler);
-            LOGGER.addHandler(fileHandler);
+                //LOGGER.addHandler(consoleHandler);
+                LOGGER.addHandler(fileHandler);
 
-            //all messages
-            consoleHandler.setLevel(Level.ALL);
-            fileHandler.setLevel(Level.ALL);
+                //all messages
+                consoleHandler.setLevel(Level.ALL);
+                fileHandler.setLevel(Level.ALL);
+            }
+
         } catch (IOException e) {
             e.printStackTrace();
         }
