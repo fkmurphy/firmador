@@ -1,6 +1,7 @@
 package org.openjfx.Main.file;
 
 import com.itextpdf.text.DocumentException;
+import org.openjfx.Main.file.exceptions.BadPasswordTokenException;
 import org.openjfx.backend.BackendConnection;
 import org.openjfx.Main.file.helpers.PathHelper;
 import org.openjfx.infrastructure.Log;
@@ -81,7 +82,8 @@ public class WorkflowFile implements FileRepository {
                 return false;
             } catch (DocumentException e) {
                 return false;
-            } catch (IOException e) {
+            }catch (BadPasswordTokenException e) {
+                LOGGER.warning("Puede que la clave ingresada para firmar no sea correcta.");
                 return false;
             }
             BackendConnection.get().sendFile(dstFilename,this.id);

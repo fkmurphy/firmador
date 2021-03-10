@@ -1,6 +1,7 @@
 package org.openjfx.Main.file;
 
 import com.itextpdf.text.DocumentException;
+import org.openjfx.Main.file.exceptions.BadPasswordTokenException;
 import org.openjfx.Main.file.helpers.PathHelper;
 import org.openjfx.token.models.Token;
 
@@ -37,9 +38,8 @@ public class LocalPDF implements FileRepository{
             } catch (DocumentException e) {
                 System.out.println(e);
                 return false;
-            } catch (IOException e) {
-                System.out.println(e);
-                return false;
+            } catch (BadPasswordTokenException e) {
+
             }
             return true;
         } else {
