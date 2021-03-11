@@ -1,6 +1,7 @@
 package org.openjfx.Main.file;
 
 import com.itextpdf.text.DocumentException;
+import org.openjfx.Main.file.exceptions.BadPasswordTokenException;
 import org.openjfx.backend.BackendConnection;
 import org.openjfx.Main.file.helpers.PathHelper;
 import org.openjfx.infrastructure.Log;
@@ -61,7 +62,7 @@ public class WorkflowFile implements FileRepository {
     public String getDescription() { return this.description; }
 
     @Override
-    public Boolean sign(Token token) {
+    public Boolean sign(Token token) throws BadPasswordTokenException {
         String srcPath = getPath();
         if (srcPath.length() <= 0) {
             return false;
@@ -80,8 +81,6 @@ public class WorkflowFile implements FileRepository {
                 );
                 return false;
             } catch (DocumentException e) {
-                return false;
-            } catch (IOException e) {
                 return false;
             }
             BackendConnection.get().sendFile(dstFilename,this.id);

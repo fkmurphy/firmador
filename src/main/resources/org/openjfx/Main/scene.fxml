@@ -12,9 +12,10 @@
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox minHeight="300.0" minWidth="500.0" prefHeight="521.0" prefWidth="840.0" stylesheets="@styles.css" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.openjfx.Main.FXMLController">
+<VBox fx:id="mainVBox" minHeight="300.0" minWidth="500.0" prefHeight="521.0" prefWidth="840.0" stylesheets="@styles.css" xmlns="http://javafx.com/javafx/15.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.openjfx.Main.FXMLController">
    <children>
       <MenuBar fx:id="menuBar">
          <menus>
@@ -25,43 +26,48 @@
             </Menu>
          </menus>
       </MenuBar>
-      <HBox alignment="CENTER" fillHeight="false" VBox.vgrow="SOMETIMES">
+      <StackPane fx:id="general_stackpane" prefHeight="150.0" prefWidth="200.0">
          <children>
-            <VBox prefHeight="495.0" prefWidth="740.0" HBox.hgrow="SOMETIMES">
+            <HBox alignment="CENTER" fillHeight="false" minHeight="-Infinity" minWidth="-Infinity" prefHeight="490.0" prefWidth="840.0">
                <children>
-                  <CheckBox fx:id="select_all_files" alignment="CENTER" contentDisplay="TOP" focusTraversable="false" mnemonicParsing="false" nodeOrientation="RIGHT_TO_LEFT" onAction="#actionSelectAll" prefHeight="17.0" prefWidth="155.0" text="Seleccionar todo">
-                     <VBox.margin>
-                        <Insets bottom="5.0" left="20.0" top="5.0" />
-                     </VBox.margin></CheckBox>
-                  <TableView fx:id="table_files" editable="true" fixedCellSize="25.0" prefHeight="400.0" prefWidth="720.0" tableMenuButtonVisible="true" VBox.vgrow="SOMETIMES">
-                     <columns>
-                        <TableColumn fx:id="tb_check_file" maxWidth="1.7976931348623157E308" minWidth="25.0" prefWidth="58.0" text="Firmar" />
-                        <TableColumn fx:id="tb_path_file" maxWidth="1.7976931348623157E308" minWidth="19.0" prefWidth="261.0" text="Archivo" />
-                        <TableColumn fx:id="tb_description" maxWidth="488.0" minWidth="-1.0" prefWidth="260.0" text="Descripcion" />
-                        <TableColumn fx:id="tb_status_sign" maxWidth="1.7976931348623157E308" minWidth="0.0" prefWidth="120.0" text="Estado" />
-                     </columns>
-                     <VBox.margin>
-                        <Insets left="20.0" right="20.0" />
-                     </VBox.margin>
-                  </TableView>
-                  <ButtonBar buttonMinWidth="50.0" cacheShape="false" centerShape="false" focusTraversable="false" maxHeight="-Infinity" prefHeight="50.0" prefWidth="540.0" scaleShape="false" VBox.vgrow="SOMETIMES">
-                     <buttons>
-                        <Button fx:id="closeSigner" alignment="CENTER" maxWidth="74.0" mnemonicParsing="false" onAction="#actionCloseSigner" prefHeight="25.0" text="Cerrar" ButtonBar.buttonData="left" />
-                        <Button fx:id="btn_select_file" alignment="CENTER" contentDisplay="CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minWidth="-Infinity" mnemonicParsing="false" onAction="#selectFile" prefHeight="26.0" prefWidth="154.0" text="Agregar Archivo" textAlignment="CENTER" wrapText="true">
+                  <VBox prefHeight="495.0" prefWidth="740.0" HBox.hgrow="SOMETIMES">
+                     <children>
+                        <CheckBox fx:id="select_all_files" alignment="CENTER" contentDisplay="TOP" focusTraversable="false" mnemonicParsing="false" nodeOrientation="RIGHT_TO_LEFT" onAction="#actionSelectAll" prefHeight="17.0" prefWidth="155.0" text="Seleccionar todo">
+                           <VBox.margin>
+                              <Insets bottom="5.0" left="20.0" top="5.0" />
+                           </VBox.margin>
+                        </CheckBox>
+                        <TableView fx:id="table_files" editable="true" fixedCellSize="25.0" prefHeight="400.0" prefWidth="720.0" tableMenuButtonVisible="true" VBox.vgrow="SOMETIMES">
+                           <columns>
+                              <TableColumn fx:id="tb_check_file" maxWidth="1.7976931348623157E308" minWidth="25.0" prefWidth="58.0" text="Firmar" />
+                              <TableColumn fx:id="tb_path_file" maxWidth="1.7976931348623157E308" minWidth="19.0" prefWidth="261.0" text="Archivo" />
+                              <TableColumn fx:id="tb_description" maxWidth="488.0" minWidth="-1.0" prefWidth="260.0" text="Descripcion" />
+                              <TableColumn fx:id="tb_status_sign" maxWidth="1.7976931348623157E308" minWidth="0.0" prefWidth="120.0" text="Estado" />
+                           </columns>
+                           <VBox.margin>
+                              <Insets left="20.0" right="20.0" />
+                           </VBox.margin>
+                        </TableView>
+                        <ButtonBar buttonMinWidth="50.0" cacheShape="false" centerShape="false" focusTraversable="false" maxHeight="-Infinity" prefHeight="50.0" prefWidth="540.0" scaleShape="false" VBox.vgrow="SOMETIMES">
+                           <buttons>
+                              <Button fx:id="closeSigner" alignment="CENTER" maxWidth="74.0" mnemonicParsing="false" onAction="#actionCloseSigner" prefHeight="25.0" text="Cerrar" ButtonBar.buttonData="left" />
+                              <Button fx:id="btn_select_file" alignment="CENTER" contentDisplay="CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minWidth="-Infinity" mnemonicParsing="false" onAction="#selectFile" prefHeight="26.0" prefWidth="154.0" text="Agregar Archivo" textAlignment="CENTER" wrapText="true">
                   </Button>
-                        <PasswordField fx:id="password_token" promptText="Contraseña" />
-                        <Button fx:id="btn_firmar" mnemonicParsing="false" onAction="#firmarButton" prefHeight="26.0" text="Firmar" textAlignment="CENTER" />
-                     </buttons>
-                     <VBox.margin>
-                        <Insets left="20.0" right="20.0" />
-                     </VBox.margin>
-                     <cursor>
-                        <Cursor fx:constant="DEFAULT" />
-                     </cursor>
-                  </ButtonBar>
+                              <PasswordField fx:id="password_token" promptText="Contraseña" />
+                              <Button fx:id="btn_firmar" mnemonicParsing="false" onAction="#firmarButton" prefHeight="26.0" text="Firmar" textAlignment="CENTER" />
+                           </buttons>
+                           <VBox.margin>
+                              <Insets left="20.0" right="20.0" />
+                           </VBox.margin>
+                           <cursor>
+                              <Cursor fx:constant="DEFAULT" />
+                           </cursor>
+                        </ButtonBar>
+                     </children>
+                  </VBox>
                </children>
-            </VBox>
+            </HBox>
          </children>
-      </HBox>
+      </StackPane>
    </children>
 </VBox>

@@ -7,6 +7,7 @@ import com.itextpdf.text.pdf.PdfSignatureAppearance;
 import com.itextpdf.text.pdf.PdfStamper;
 import com.itextpdf.text.pdf.security.*;
 import org.openjfx.Main.Start;
+import org.openjfx.Main.file.exceptions.BadPasswordTokenException;
 import org.openjfx.infrastructure.Log;
 
 import java.io.File;
@@ -92,35 +93,32 @@ public class GemaltoToken implements Token {
         }*/
     }
 
-    private X509Certificate getCert() throws CertificateException, NoSuchAlgorithmException, KeyStoreException, IOException {
+    private X509Certificate getCert() throws CertificateException, NoSuchAlgorithmException, KeyStoreException, BadPasswordTokenException {
         X509Certificate cert = null;
-        //try {
-        KeyStore ks = getKeystoreInstance();
-        if(ks == null)
-            throw new NullPointerException();
-        Enumeration<String> aliases = ks.aliases();
+        try {
+            KeyStore ks = getKeystoreInstance();
+            if(ks == null)
+                throw new NullPointerException();
+            Enumeration<String> aliases = ks.aliases();
 
-        if(aliases != null){
-            String alias = aliases.nextElement();
-            cert = (X509Certificate) ks.getCertificate(alias);
+            if(aliases != null){
+                String alias = aliases.nextElement();
+                cert = (X509Certificate) ks.getCertificate(alias);
+            }
+
+            if (cert == null) {
+                LOGGER.warning("ERROR al obtener el driver del token. Posiblemente no se encuentre el archivo.");
+                throw new CertificateException("Certificado no encontrado.");
+            }
+
+            return cert;
+        } catch (IOException e) {
+            throw new BadPasswordTokenException();
         }
-
-        if (cert == null) {
-            LOGGER.warning("ERROR al obtener el driver del token. Posiblemente no se encuentre el archivo.");
-            throw new CertificateException("Certificado no encontrado.");
-        }
-
-       /* } catch (KeyStoreException e) {
-            e.printStackTrace();
-        } catch (NullPointerException p) {
-            System.out.println("null");
-            p.printStackTrace();
-        }*/
-        return cert;
     }
 
     @Override
-    public Map<String,String> getInfo() throws CertificateException, NoSuchAlgorithmException, KeyStoreException, IOException {
+    public Map<String,String> getInfo() throws CertificateException, NoSuchAlgorithmException, KeyStoreException, BadPasswordTokenException {
         Map<String,String> map = new HashMap<>();
         X509Certificate cert = getCert();
         map.put("issuer",cert.getIssuerDN().toString());
@@ -153,10 +151,12 @@ public class GemaltoToken implements Token {
         return ((to - now) / TICKS_POR_DIA);
     }
 
-    public void sign(String src, String dst) throws GeneralSecurityException, DocumentException, IOException {
+    public void sign(String src, String dst) throws GeneralSecurityException, DocumentException,  BadPasswordTokenException {
         this.signWithPositionStamper(src,dst,40,40); // Dejo como estaba todo antes
     }
-    public void signWithPositionStamper(String src, String dst, int posX,int posY) throws GeneralSecurityException, IOException, DocumentException {
+
+    public void signWithPositionStamper(String src, String dst, int posX,int posY) throws GeneralSecurityException, DocumentException, BadPasswordTokenException {
+        try {
             KeyStore ks = getKeystoreInstance();
             if(ks == null){
                 LOGGER.warning("ERROR, no se puede firmar porque no se encuentra la clave del token.");
@@ -184,32 +184,9 @@ public class GemaltoToken implements Token {
                     getProvider().getName(), MakeSignature.CryptoStandard.CMS,
                     "-", "Viedma, Río Negro, Argentina", posX, posY);
 
-            String aliase;
-           /* while (aliases.hasMoreElements()) {
-                aliase = aliases.nextElement();
-
-                System.out.println("Eliminando entry " + aliase);
-                ks.deleteEntry(aliase);
-            }*/
-
-        /*} catch (IOException e) {
-            e.printStackTrace();
-        }catch (KeyStoreException e) {
-            System.out.println("Error keystore");
-            e.printStackTrace();
-        } catch (UnrecoverableKeyException e) {
-            System.out.println("Error UnrecoverableKey");
-            e.printStackTrace();
-        } catch (NoSuchAlgorithmException e) {
-            System.out.println("Error nosuch algorith");
-            e.printStackTrace();
-        } catch (DocumentException e) {
-            System.out.println("Error documentexceptin");
-            e.printStackTrace();
-        } catch (GeneralSecurityException e) {
-            System.out.println("Error general security");
-            e.printStackTrace();
-        }*/
+        } catch (IOException e) {
+            throw new BadPasswordTokenException();
+        }
 
     }
 

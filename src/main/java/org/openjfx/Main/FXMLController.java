@@ -23,7 +23,10 @@ public class FXMLController implements Initializable {
 
 import javafx.application.HostServices;
 import javafx.application.Platform;
+import javafx.concurrent.WorkerStateEvent;
+import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.geometry.Pos;
 import javafx.scene.layout.HBox;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory;
@@ -37,12 +40,15 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import javafx.stage.*;
 import javafx.util.Callback;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.openjfx.Main.file.exceptions.BadPasswordTokenException;
 import org.openjfx.backend.BackendConnection;
 import org.openjfx.Main.file.LocalPDF;
 import org.openjfx.Main.file.WorkflowFile;
@@ -72,6 +78,8 @@ public class FXMLController implements Initializable {
     @FXML
     private Button closeSigner;
 
+    @FXML
+    private StackPane general_stackpane;
     /**
      * Buttons
      */
@@ -80,8 +88,8 @@ public class FXMLController implements Initializable {
 
     @FXML
     private CheckBox select_all_files;
-    //@FXML
-    //private Button btn_firmar;
+    @FXML
+    private Button btn_firmar;
 
 
     /**
@@ -143,6 +151,13 @@ public class FXMLController implements Initializable {
                         }
                         fileSrc.setChecked(false);
 
+                    } catch(BadPasswordTokenException bad){
+                        LOGGER.warning("Puede que la clave ingresada para firmar no sea correcta.");
+                        Platform.runLater(()-> {
+                            PopupComponent popc = new PopupComponent("Verifique la contraseña ingresada.", stage.getScene().getWindow());
+                            popc.showPopup().show(stage.getScene().getWindow());
+                        });
+
                     } catch (Exception e) {
                         fileSrc.setStatus("fail");
                         LOGGER.warning("Hubo un problema al firmar el archivo. " + e.getMessage());
@@ -176,6 +191,7 @@ public class FXMLController implements Initializable {
             if(!listitems.contains(newFile)) {
                 listitems.add(newFile);
             }
+            newFile.updateGraphicStatus();
         }
         //notificationPane.getChildren().add(Notification.createClipped());
 
@@ -196,6 +212,75 @@ public class FXMLController implements Initializable {
         /*listitems.add(
                 new FilesToBeSigned((FileRepository) new SambaConnection())
         );*/
+        btn_firmar.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+
+                ProgressIndicator pi = new ProgressIndicator();
+                VBox box = new VBox(pi);
+                box.setAlignment(Pos.CENTER);
+                general_stackpane.setDisable(true);
+                general_stackpane.getChildren().add(box);
+
+                token = new GemaltoToken(password_token.getText());
+                try {
+                    token.getInfo();
+                } catch(BadPasswordTokenException bad){
+                    LOGGER.warning("Puede que la clave ingresada para firmar no sea correcta.");
+                    Platform.runLater(()-> {
+                        PopupComponent popc = new PopupComponent("Verifique la contraseña ingresada.", stage.getScene().getWindow());
+                        popc.showPopup().show(stage.getScene().getWindow());
+                    });
+
+                } catch (Exception e) {
+                    LOGGER.warning("Hubo un problema al obtener información del token. " + e.getMessage());
+                    Platform.runLater(()-> {
+                        PopupComponent popc = new PopupComponent("Verifique el token.", stage.getScene().getWindow());
+                        popc.showPopup().show(stage.getScene().getWindow());
+                    });
+                    return;
+                }
+                SignService ss = new SignService(listitems, token);
+
+                pi.visibleProperty().bind(ss.runningProperty());
+                ss.setOnSucceeded(new EventHandler<WorkerStateEvent>() {
+                    @Override
+                    public void handle(WorkerStateEvent event) {
+                        general_stackpane.setDisable(false);
+                        general_stackpane.getChildren().remove(box);
+
+                        Iterator<FilesToBeSigned> listFilesSrc = listitems.iterator();
+                        FilesToBeSigned fileSrc;
+                        while(listFilesSrc.hasNext()){
+                            fileSrc = listFilesSrc.next();
+                            fileSrc.updateGraphicStatus();
+                            fileSrc.setChecked(false);
+                        }
+                    }
+                });
+                ss.setOnFailed(new EventHandler<WorkerStateEvent>() {
+                    @Override
+                    public void handle(WorkerStateEvent event) {
+                        general_stackpane.setDisable(false);
+                        general_stackpane.getChildren().remove(box);
+                        Iterator<FilesToBeSigned> listFilesSrc = listitems.iterator();
+                        FilesToBeSigned fileSrc;
+                        while(listFilesSrc.hasNext()){
+                            fileSrc = listFilesSrc.next();
+                            fileSrc.updateGraphicStatus();
+                            fileSrc.setChecked(false);
+                        }
+                        LOGGER.warning("Falló el hilo que procesa los documentos. :::message_error:" + ss.getException().getMessage());
+                        Platform.runLater(()-> {
+                            PopupComponent popc = new PopupComponent("Hubo un problema, revise los documentos.", stage.getScene().getWindow());
+                            popc.showPopup().show(stage.getScene().getWindow());
+                        });
+
+                    }
+                });
+                ss.restart();
+            }
+        });
     }
 
     private void processDocumentsBackend() {
@@ -232,6 +317,7 @@ public class FXMLController implements Initializable {
             String description;
             JSONObject json;
             WorkflowFile ll;
+            FilesToBeSigned file;
             for (int i =0;i<array.length();i++){
                 json = (JSONObject)array.get(i);
                 id =  Integer.parseInt(json.get("id").toString());
@@ -242,7 +328,9 @@ public class FXMLController implements Initializable {
                 posX = Integer.parseInt(json.get("posX").toString());
                 posY = Integer.parseInt(json.get("posY").toString());
                 ll = new WorkflowFile(id, year, type, number, description, posX, posY);
-                listitems.add( new FilesToBeSigned(ll));
+                file = new FilesToBeSigned(ll);
+                listitems.add(file);
+                file.updateGraphicStatus();
             }
         } catch (ConnectException e) {
             LOGGER.warning("Error de conexión con backend :::response:" + e.getMessage());
