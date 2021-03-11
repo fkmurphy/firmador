@@ -191,6 +191,7 @@ public class FXMLController implements Initializable {
             if(!listitems.contains(newFile)) {
                 listitems.add(newFile);
             }
+            newFile.updateGraphicStatus();
         }
         //notificationPane.getChildren().add(Notification.createClipped());
 
@@ -316,6 +317,7 @@ public class FXMLController implements Initializable {
             String description;
             JSONObject json;
             WorkflowFile ll;
+            FilesToBeSigned file;
             for (int i =0;i<array.length();i++){
                 json = (JSONObject)array.get(i);
                 id =  Integer.parseInt(json.get("id").toString());
@@ -326,7 +328,9 @@ public class FXMLController implements Initializable {
                 posX = Integer.parseInt(json.get("posX").toString());
                 posY = Integer.parseInt(json.get("posY").toString());
                 ll = new WorkflowFile(id, year, type, number, description, posX, posY);
-                listitems.add( new FilesToBeSigned(ll));
+                file = new FilesToBeSigned(ll);
+                listitems.add(file);
+                file.updateGraphicStatus();
             }
         } catch (ConnectException e) {
             LOGGER.warning("Error de conexión con backend :::response:" + e.getMessage());

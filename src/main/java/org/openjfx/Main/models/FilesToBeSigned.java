@@ -22,7 +22,6 @@ public class FilesToBeSigned {
         this.checked = new CheckBox();
         this.signed = new Button();
         setStatus("");
-        updateGraphicStatus();
         signed.setStyle(
                 "-fx-background-color:none;"+
                         "-fx-border:none;"
