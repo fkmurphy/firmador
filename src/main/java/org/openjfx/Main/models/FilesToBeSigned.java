@@ -14,6 +14,7 @@ public class FilesToBeSigned {
     protected FileRepository file;
     protected CheckBox checked;
     protected Button signed;
+    protected String status;
 
     //
     public FilesToBeSigned(FileRepository file){
@@ -21,6 +22,7 @@ public class FilesToBeSigned {
         this.checked = new CheckBox();
         this.signed = new Button();
         setStatus("");
+        updateGraphicStatus();
         signed.setStyle(
                 "-fx-background-color:none;"+
                         "-fx-border:none;"
@@ -66,9 +68,15 @@ public class FilesToBeSigned {
         return this.getRepresentativePath().compareTo(((FilesToBeSigned)obj).getRepresentativePath()) == 0;
     }
 
+    public String getStatus () { return status; }
     public void setStatus(String status)
     {
+        this.status = status;
+        //icon.setIconSize(15);
+        //this.signed.setGraphic(icon);
+    }
 
+    public void updateGraphicStatus() {
         Text icon;
         switch (status) {
             case "signed":
@@ -83,10 +91,8 @@ public class FilesToBeSigned {
                 icon = FontAwesomeIconFactory.get().createIcon(FontAwesomeIcon.FILE_PDF_ALT);
                 break;
         }
-        //icon.setIconSize(15);
         this.signed.setGraphic(icon);
     }
-
     public void setSigned (Button btn)
     {
         this.signed = btn;
