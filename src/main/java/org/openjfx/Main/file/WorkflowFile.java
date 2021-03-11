@@ -62,7 +62,7 @@ public class WorkflowFile implements FileRepository {
     public String getDescription() { return this.description; }
 
     @Override
-    public Boolean sign(Token token) {
+    public Boolean sign(Token token) throws BadPasswordTokenException {
         String srcPath = getPath();
         if (srcPath.length() <= 0) {
             return false;
@@ -81,9 +81,6 @@ public class WorkflowFile implements FileRepository {
                 );
                 return false;
             } catch (DocumentException e) {
-                return false;
-            }catch (BadPasswordTokenException e) {
-                LOGGER.warning("Puede que la clave ingresada para firmar no sea correcta.");
                 return false;
             }
             BackendConnection.get().sendFile(dstFilename,this.id);

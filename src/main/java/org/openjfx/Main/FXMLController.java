@@ -43,6 +43,7 @@ import javafx.stage.*;
 import javafx.util.Callback;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.openjfx.Main.file.exceptions.BadPasswordTokenException;
 import org.openjfx.backend.BackendConnection;
 import org.openjfx.Main.file.LocalPDF;
 import org.openjfx.Main.file.WorkflowFile;
@@ -142,6 +143,13 @@ public class FXMLController implements Initializable {
                             fileSrc.setStatus("signed");
                         }
                         fileSrc.setChecked(false);
+
+                    } catch(BadPasswordTokenException bad){
+                        LOGGER.warning("Puede que la clave ingresada para firmar no sea correcta.");
+                        Platform.runLater(()-> {
+                            PopupComponent popc = new PopupComponent("Verifique la contraseña ingresada.", stage.getScene().getWindow());
+                            popc.showPopup().show(stage.getScene().getWindow());
+                        });
 
                     } catch (Exception e) {
                         fileSrc.setStatus("fail");

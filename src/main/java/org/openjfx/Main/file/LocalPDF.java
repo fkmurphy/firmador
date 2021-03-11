@@ -27,7 +27,7 @@ public class LocalPDF implements FileRepository{
 
 
     @Override
-    public Boolean sign(Token token) {
+    public Boolean sign(Token token) throws BadPasswordTokenException {
         String dstFilename = PathHelper.generateDestionationPath(this.path);
         if (dstFilename != null && dstFilename != ""){
             try {
@@ -38,8 +38,6 @@ public class LocalPDF implements FileRepository{
             } catch (DocumentException e) {
                 System.out.println(e);
                 return false;
-            } catch (BadPasswordTokenException e) {
-
             }
             return true;
         } else {
