@@ -2,6 +2,7 @@ package org.openjfx.Main.models;
 
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
+import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import org.openjfx.Main.file.FileRepository;
 
@@ -13,6 +14,7 @@ public class FilesToBeSigned {
     protected FileRepository file;
     protected CheckBox checked;
     protected Button signed;
+    protected String status;
 
     //
     public FilesToBeSigned(FileRepository file){
@@ -65,25 +67,31 @@ public class FilesToBeSigned {
         return this.getRepresentativePath().compareTo(((FilesToBeSigned)obj).getRepresentativePath()) == 0;
     }
 
+    public String getStatus () { return status; }
     public void setStatus(String status)
     {
+        this.status = status;
+        //icon.setIconSize(15);
+        //this.signed.setGraphic(icon);
+    }
 
+    public void updateGraphicStatus() {
         Text icon;
         switch (status) {
             case "signed":
                 icon = FontAwesomeIconFactory.get().createIcon(FontAwesomeIcon.CHECK);
+                icon.setFill(Color.GREEN);
                 break;
             case "fail":
                 icon = FontAwesomeIconFactory.get().createIcon(FontAwesomeIcon.CLOSE);
+                icon.setFill(Color.RED);
                 break;
             default:
                 icon = FontAwesomeIconFactory.get().createIcon(FontAwesomeIcon.FILE_PDF_ALT);
                 break;
         }
-        //icon.setIconSize(15);
         this.signed.setGraphic(icon);
     }
-
     public void setSigned (Button btn)
     {
         this.signed = btn;

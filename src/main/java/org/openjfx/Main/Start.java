@@ -9,6 +9,7 @@ import javafx.scene.Scene;
 
 import javafx.scene.control.Alert;
 import javafx.stage.Stage;
+import org.openjfx.infrastructure.Log;
 import org.openjfx.token.models.ConfigureProvider;
 import org.openjfx.token.models.LocalProvider;
 
@@ -38,6 +39,8 @@ public class Start extends Application {
          * update
          */
         //System.out.println(getClass().getResource("/org/openjfx/Main/scene.fxml"));
+        Log startLog = new Log();
+        startLog.info("Inicio de firmador. Los parametros son " + getParameters().getRaw());
         FXMLLoader loader = new FXMLLoader(getClass().getResource("scene.fxml"));
         Map<String,String> map = null;
         try {
