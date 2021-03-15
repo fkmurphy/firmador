@@ -1,6 +1,7 @@
 package org.openjfx.Main.file;
 
 import com.itextpdf.text.DocumentException;
+import org.openjfx.Main.file.exceptions.BadPasswordTokenException;
 import org.openjfx.Main.file.helpers.PathHelper;
 import org.openjfx.token.models.Token;
 
@@ -26,7 +27,7 @@ public class LocalPDF implements FileRepository{
 
 
     @Override
-    public Boolean sign(Token token) {
+    public Boolean sign(Token token) throws BadPasswordTokenException {
         String dstFilename = PathHelper.generateDestionationPath(this.path);
         if (dstFilename != null && dstFilename != ""){
             try {
@@ -35,9 +36,6 @@ public class LocalPDF implements FileRepository{
                 System.out.println(e);
                 return false;
             } catch (DocumentException e) {
-                System.out.println(e);
-                return false;
-            } catch (IOException e) {
                 System.out.println(e);
                 return false;
             }
