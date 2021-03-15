@@ -198,7 +198,7 @@ public class FXMLController implements Initializable {
         HttpResponse<String> response;
         try {
             bk =  BackendConnection.get(mapArgument);
-            response = bk.getRequest("/documents/pending?purpose=1");
+            response = bk.getRequest("/documents/pending?purpose=0");
             // TODO: 5/10/20 throwable
             if (response == null) {
                 throw new ConnectException("Hubo un problema al pedir los documentos.");
