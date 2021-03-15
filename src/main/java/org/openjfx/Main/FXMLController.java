@@ -216,11 +216,6 @@ public class FXMLController implements Initializable {
             @Override
             public void handle(ActionEvent event) {
 
-                ProgressIndicator pi = new ProgressIndicator();
-                VBox box = new VBox(pi);
-                box.setAlignment(Pos.CENTER);
-                general_stackpane.setDisable(true);
-                general_stackpane.getChildren().add(box);
 
                 token = new GemaltoToken(password_token.getText());
                 try {
@@ -240,6 +235,13 @@ public class FXMLController implements Initializable {
                     });
                     return;
                 }
+
+                ProgressIndicator pi = new ProgressIndicator();
+                VBox box = new VBox(pi);
+                box.setAlignment(Pos.CENTER);
+                general_stackpane.setDisable(true);
+                general_stackpane.getChildren().add(box);
+
                 SignService ss = new SignService(listitems, token);
 
                 pi.visibleProperty().bind(ss.runningProperty());
