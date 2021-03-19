@@ -293,7 +293,10 @@ public class FXMLController implements Initializable {
         HttpResponse<String> response;
         try {
             bk =  BackendConnection.get(mapArgument);
-            response = bk.getRequest("/documents/pending?purpose=0");
+            response = bk.postRequest(
+                    "/documents",
+                    new JSONObject("{ purpose: 0 }")
+            );
             // TODO: 5/10/20 throwable
             if (response == null) {
                 LOGGER.warning("No hay respuesta desde el backend.");
