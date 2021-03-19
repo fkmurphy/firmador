@@ -80,6 +80,39 @@ public class BackendConnection {
         }
     }
 
+    /**
+     * documents
+     * @param documents
+     * @return HttpResponse documents
+     */
+    public HttpResponse<String> postRequest(String documents, JSONObject body) throws HttpConnectTimeoutException, ConnectException, IOException, InterruptedException
+    {
+        HttpRequest request = HttpRequest.newBuilder()
+                .POST(HttpRequest.BodyPublishers.ofString(body.toString()))
+                .uri(URI.create(this.url+documents))
+                .setHeader("Content-Type","application/json")
+                .setHeader("Accept","application/json")
+                .setHeader("Authorization",this.token)
+                .timeout(Duration.ofSeconds(5))
+                .build();
+        HttpResponse<String> response = null;
+
+        try {
+            response = this.client.send(request, HttpResponse.BodyHandlers.ofString());
+            return response;
+        } catch (HttpConnectTimeoutException e) {
+            //e.printStackTrace();
+            throw new HttpConnectTimeoutException("timeout http connect");
+        } catch (ConnectException e) {
+            throw new ConnectException("check network");
+
+        } catch (IOException e) {
+            throw new IOException("-");
+        } catch (InterruptedException e) {
+            throw new InterruptedException(".");
+        }
+    }
+
     public void downloadFile(String document, String dst) throws MalformedURLException, IOException {
         URLConnection urlc = new URL(this.url+document).openConnection();
         urlc.setRequestProperty("Authorization",this.token);
