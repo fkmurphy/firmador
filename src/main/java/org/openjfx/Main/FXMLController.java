@@ -295,7 +295,7 @@ public class FXMLController implements Initializable {
             bk =  BackendConnection.get(mapArgument);
             response = bk.postRequest(
                     "/documents",
-                    new JSONObject("{ purpose: 0 }")
+                    new JSONObject("{ \"purpose\": 0, \"status\": \"pending\", \"priority\": 1}")
             );
             // TODO: 5/10/20 throwable
             if (response == null) {
