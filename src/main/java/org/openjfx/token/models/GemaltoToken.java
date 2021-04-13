@@ -1,6 +1,7 @@
 package org.openjfx.token.models;
 
 import com.itextpdf.text.DocumentException;
+import com.itextpdf.text.FontFactory;
 import com.itextpdf.text.Rectangle;
 import com.itextpdf.text.pdf.PdfReader;
 import com.itextpdf.text.pdf.PdfSignatureAppearance;
@@ -211,6 +212,7 @@ public class GemaltoToken implements Token {
             certLevel = PdfSignatureAppearance.NOT_CERTIFIED;
         }*/
         appearance.setCertificationLevel(certLevel);
+        appearance.setLayer2Font(FontFactory.getFont("Arial", 5f));
 
         int lastPage = reader.getNumberOfPages();
         // 40 = 1cm
