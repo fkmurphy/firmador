@@ -1,6 +1,5 @@
 package org.openjfx.Main.file;
 
-import com.itextpdf.text.DocumentException;
 import org.openjfx.Main.file.exceptions.BadPasswordTokenException;
 import org.openjfx.backend.BackendConnection;
 import org.openjfx.Main.file.helpers.PathHelper;
@@ -39,12 +38,12 @@ public class WorkflowFile implements FileRepository {
         BackendConnection bk = BackendConnection.get();
 
         try {
-            String dst = System.getProperty("java.io.tmpdir") + "/" +this.id+"_"+this.year+"_"+this.number+".pdf";
+            String dst =  System.getProperty("java.io.tmpdir") + "/" +this.id+"_"+this.year+"_"+this.number+".pdf";
             bk.downloadFile("/documents/view/"+this.id, dst);
             return dst;
         } catch (IOException e) {
             LOGGER.warning("No se encontró el path del archivo. El documento se intentó descargar desde el backend."
-                    + " Document" + this.id + " year" + this.year + " number " + this.number
+                    + " Document " + this.id + " year " + this.year + " number " + this.number
                     + " :::response:" + e.getMessage()
             );
             //e.printStackTrace();
@@ -80,7 +79,7 @@ public class WorkflowFile implements FileRepository {
                         + " :::exception_message:" + e.getMessage()
                 );
                 return false;
-            } catch (DocumentException e) {
+            } catch (Exception e) {
                 return false;
             }
             BackendConnection.get().sendFile(dstFilename,this.id);

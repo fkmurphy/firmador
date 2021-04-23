@@ -3,14 +3,16 @@ module org.openjfx {
     requires javafx.graphics;
     requires javafx.fxml;
     requires jdk.crypto.cryptoki;
-    requires bcprov.jdk15on;
-    requires itextpdf;
+    //requires bcprov.jdk15on;
+    //requires itextpdf;
     requires java.net.http;
-    requires org.json;
     requires jcifs;
     requires de.jensd.fx.glyphs.fontawesome;
     requires org.update4j;
     requires java.logging;
+    requires org.json;
+    requires sign;
+    requires kernel;
 
 
     opens org.openjfx.Main.models to javafx.base;

@@ -1,12 +1,9 @@
 package org.openjfx.token.models;
 
-import com.itextpdf.text.DocumentException;
-import com.itextpdf.text.FontFactory;
-import com.itextpdf.text.Rectangle;
-import com.itextpdf.text.pdf.PdfReader;
-import com.itextpdf.text.pdf.PdfSignatureAppearance;
-import com.itextpdf.text.pdf.PdfStamper;
-import com.itextpdf.text.pdf.security.*;
+import com.itextpdf.kernel.geom.Rectangle;
+import com.itextpdf.kernel.pdf.PdfReader;
+import com.itextpdf.kernel.pdf.StampingProperties;
+import com.itextpdf.signatures.*;
 import org.openjfx.Main.Start;
 import org.openjfx.Main.file.exceptions.BadPasswordTokenException;
 import org.openjfx.infrastructure.Log;
@@ -16,15 +13,15 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.security.*;
 import java.security.cert.Certificate;
-import java.security.cert.*;
-import java.time.LocalDateTime;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 import java.util.*;
 
 public class GemaltoToken implements Token {
 
     private static final long TICKS_POR_DIA = 1000 * 60 * 60 * 24;
     private final static Log LOGGER = new Log();
-    protected ExternalSignature signature =null;
+    //protected ExternalSignature signature =null;
     protected String driverPath;
     private char[] pwd;
     protected Provider provider;
@@ -152,11 +149,11 @@ public class GemaltoToken implements Token {
         return ((to - now) / TICKS_POR_DIA);
     }
 
-    public void sign(String src, String dst) throws GeneralSecurityException, DocumentException,  BadPasswordTokenException {
+    public void sign(String src, String dst) throws GeneralSecurityException, BadPasswordTokenException {
         this.signWithPositionStamper(src,dst,40,40); // Dejo como estaba todo antes
     }
 
-    public void signWithPositionStamper(String src, String dst, int posX,int posY) throws GeneralSecurityException, DocumentException, BadPasswordTokenException {
+    public void signWithPositionStamper(String src, String dst, int posX,int posY) throws GeneralSecurityException, BadPasswordTokenException {
         try {
             KeyStore ks = getKeystoreInstance();
             if(ks == null){
@@ -175,14 +172,20 @@ public class GemaltoToken implements Token {
                 chain = ks.getCertificateChain(alias);
             }
 
-            if(signature == null && privKey != null) {
-                signature =
-                        new PrivateKeySignature(privKey, DigestAlgorithms.SHA256, ks.getProvider().getName());
-            }
+            //if(signature == null && privKey != null) {
+            //    signature =
+            //            new PrivateKeySignature(
+            //                    privKey,
+            //                    DigestAlgorithms.SHA256,
+            //                    ks.getProvider().getName()
+            //            );
+            //}
 
             // TODO: 6/10/20 excepcion por null
             processSign(src, dst, chain,privKey, DigestAlgorithms.SHA256,
-                    getProvider().getName(), MakeSignature.CryptoStandard.CMS,
+                    getProvider().getName(),
+                    PdfSigner.CryptoStandard.CADES,
+                    // MakeSignature.CryptoStandard.CMS,
                     "-", "Viedma, Río Negro, Argentina", posX, posY);
 
         } catch (IOException e) {
@@ -193,39 +196,62 @@ public class GemaltoToken implements Token {
 
     public void processSign(String src, String dest,
                             Certificate[] chain, PrivateKey pk, String digestAlgorithm, String provider,
-                            MakeSignature.CryptoStandard subfilter, String reason, String location, int posX, int posY)
-            throws GeneralSecurityException, IOException, DocumentException {
+                            //MakeSignature.CryptoStandard subfilter,
+                            PdfSigner.CryptoStandard subfilter,
+                            String reason, String location, int posX, int posY)
+            throws GeneralSecurityException, IOException {
 
         // Creating the reader and the stamper
         PdfReader reader = new PdfReader(src);
         //Rectangle lala = reader.getPageSize(reader.getNumberOfPages());
         FileOutputStream os = new FileOutputStream(dest);
-        PdfStamper stamper = PdfStamper.createSignature(reader, os, '\0',null,true);
+
+        PdfSigner signer = new PdfSigner(reader, new FileOutputStream(dest), new StampingProperties());
+
+        Rectangle rect = new Rectangle(36, 648, 200, 100);
+        PdfSignatureAppearance appearance = signer.getSignatureAppearance();
+
+
+
+        //PdfStamper stamper = PdfStamper.createSignature(reader, os, '\0',null,true);
         // Creating the appearance
-        PdfSignatureAppearance appearance = stamper.getSignatureAppearance();
+        //PdfSignatureAppearance appearance = stamper.getSignatureAppearance();
         appearance.setReason(reason);
         appearance.setLocation(location);
         //permitir firmado
-        int certLevel = PdfSignatureAppearance.NOT_CERTIFIED;
-
+        //int certLevel = PdfSignatureAppearance.NOT_CERTIFIED;
+        //appearance.setCertificationLevel(certLevel);
+        //appearance.setLayer2Font(FontFactory.getFont("Arial", 5f));
         /*if (reader.getAcroFields().getSignatureNames().size() > 0) {
             certLevel = PdfSignatureAppearance.NOT_CERTIFIED;
         }*/
-        appearance.setCertificationLevel(certLevel);
-        appearance.setLayer2Font(FontFactory.getFont("Arial", 5f));
+        signer.setCertificationLevel(PdfSigner.NOT_CERTIFIED);
 
-        int lastPage = reader.getNumberOfPages();
+
+        //int lastPage = reader.getNumberOfPages();
         // 40 = 1cm
         // 40 init x | 40 init y (1cmX x 1cmY)
         // 40+120 | 40 + 40
-        appearance.setVisibleSignature(new Rectangle(posX, posY, posX+120, posY+40), lastPage, "sig"+ (new Random()).nextInt(25));
+        //appearance.setVisibleSignature(new Rectangle(posX, posY, posX+120, posY+40), lastPage, "sig"+ (new Random()).nextInt(25));
+
+       int lastPage = appearance.getPageNumber();
+        appearance.setPageRect(rect)
+                .setPageNumber(lastPage)
+                .setReason(reason)
+                .setLocation(location);
+
+        IExternalSignature pks = new PrivateKeySignature(pk, digestAlgorithm, provider);
+        IExternalDigest digest = new BouncyCastleDigest();
         // Creating the signature
-        ExternalDigest digest = new BouncyCastleDigest();
+        //ExternalDigest digest = new BouncyCastleDigest();
 
-        MakeSignature.signDetached(appearance, digest, signature, chain,
-                null, null, null, 0, subfilter);
+        signer.signDetached(digest, pks, chain,
+                null, null, null,
+                0, subfilter);
+        //MakeSignature.signDetached(appearance, digest, signature, chain,
+              //  null, null, null, 0, subfilter);
 
-        stamper.close();
+        //stamper.close();
         reader.close();
         os.close();
     }
