@@ -1,7 +1,9 @@
 package org.openjfx.token.models;
 
 import com.itextpdf.kernel.geom.Rectangle;
+import com.itextpdf.kernel.pdf.PdfDocument;
 import com.itextpdf.kernel.pdf.PdfReader;
+import com.itextpdf.kernel.pdf.PdfWriter;
 import com.itextpdf.kernel.pdf.StampingProperties;
 import com.itextpdf.signatures.*;
 import org.openjfx.Main.Start;
@@ -22,6 +24,7 @@ public class GemaltoToken implements Token {
     private static final long TICKS_POR_DIA = 1000 * 60 * 60 * 24;
     private final static Log LOGGER = new Log();
     //protected ExternalSignature signature =null;
+    protected IExternalSignature signature = null;
     protected String driverPath;
     private char[] pwd;
     protected Provider provider;
@@ -172,21 +175,22 @@ public class GemaltoToken implements Token {
                 chain = ks.getCertificateChain(alias);
             }
 
-            //if(signature == null && privKey != null) {
-            //    signature =
-            //            new PrivateKeySignature(
-            //                    privKey,
-            //                    DigestAlgorithms.SHA256,
-            //                    ks.getProvider().getName()
-            //            );
-            //}
-
-            // TODO: 6/10/20 excepcion por null
+            if(signature == null && privKey != null) {
+                String providerName = ks.getProvider().getName();
+                signature =
+                        new PrivateKeySignature(
+                                privKey,
+                                DigestAlgorithms.SHA256,
+                                providerName
+                        );
+            }
             processSign(src, dst, chain,privKey, DigestAlgorithms.SHA256,
                     getProvider().getName(),
                     PdfSigner.CryptoStandard.CADES,
                     // MakeSignature.CryptoStandard.CMS,
                     "-", "Viedma, Río Negro, Argentina", posX, posY);
+
+            // TODO: 6/10/20 excepcion por null
 
         } catch (IOException e) {
             throw new BadPasswordTokenException();
@@ -208,9 +212,10 @@ public class GemaltoToken implements Token {
 
         PdfSigner signer = new PdfSigner(reader, new FileOutputStream(dest), new StampingProperties());
 
-        Rectangle rect = new Rectangle(36, 648, 200, 100);
+        Rectangle rect = new Rectangle(posX, posY, posX+120, posY + 40);
         PdfSignatureAppearance appearance = signer.getSignatureAppearance();
-
+        appearance.setLayer2FontSize(5f);
+        //appearance.setLayer2Font(PdfFontFactory.createFont("Arial", "ISO-8859-1", true));
 
 
         //PdfStamper stamper = PdfStamper.createSignature(reader, os, '\0',null,true);
@@ -240,12 +245,13 @@ public class GemaltoToken implements Token {
                 .setReason(reason)
                 .setLocation(location);
 
-        IExternalSignature pks = new PrivateKeySignature(pk, digestAlgorithm, provider);
+        // signature IExternalSignature pks = new PrivateKeySignature(pk, digestAlgorithm, provider);
+
         IExternalDigest digest = new BouncyCastleDigest();
         // Creating the signature
         //ExternalDigest digest = new BouncyCastleDigest();
 
-        signer.signDetached(digest, pks, chain,
+        signer.signDetached(digest, signature, chain,
                 null, null, null,
                 0, subfilter);
         //MakeSignature.signDetached(appearance, digest, signature, chain,
@@ -254,5 +260,26 @@ public class GemaltoToken implements Token {
         //stamper.close();
         reader.close();
         os.close();
+
+        addLTV(dest, dest + "alguito.pdf", null, null, null);
+    }
+
+    void addLTV(String src, String dest, IOcspClient ocsp, ICrlClient crl, ITSAClient itsaClient)
+            throws IOException, GeneralSecurityException {
+        PdfReader   reader = new PdfReader(src);
+        PdfWriter writer = new PdfWriter(dest);
+        PdfDocument pdfDoc = new PdfDocument(reader, writer, new StampingProperties().useAppendMode());
+        LtvVerification v = new LtvVerification(pdfDoc);
+        SignatureUtil signatureUtil = new SignatureUtil(pdfDoc);
+        List<String> names = signatureUtil.getSignatureNames();
+        String sigName = names.get(names.size() - 1);
+        //PdfPKCS7 pkcs7 = signatureUtil.readSignatureData(sigName);
+        for (String name : names) {
+            v.addVerification(name, ocsp, crl, LtvVerification.CertificateOption.WHOLE_CHAIN,
+                    LtvVerification.Level.OCSP_CRL, LtvVerification.CertificateInclusion.NO);
+        }
+        v.merge();
+
+        pdfDoc.close();
     }
 }
