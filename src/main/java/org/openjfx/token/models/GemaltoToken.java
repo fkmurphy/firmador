@@ -260,11 +260,12 @@ public class GemaltoToken implements Token {
         //stamper.close();
         reader.close();
         os.close();
-
-        addLTV(dest, dest + "alguito.pdf", null, null, null);
+        //OCSPVerifier ocspVerifier = new OCSPVerifier(null, null);
+        //IOcspClient ocsp = new OcspClientBouncyCastle(null);
+        //addLTV(dest, dest + "ltv.pdf", ocsp, new CrlClientOnline(), LtvVerification.Level.OCSP_CRL, LtvVerification.Level.OCSP_CRL);
     }
 
-    void addLTV(String src, String dest, IOcspClient ocsp, ICrlClient crl, ITSAClient itsaClient)
+    void addLTV(String src, String dest, IOcspClient ocsp, ICrlClient crl, LtvVerification.Level timestapLevel, LtvVerification.Level signatureLevel)
             throws IOException, GeneralSecurityException {
         PdfReader   reader = new PdfReader(src);
         PdfWriter writer = new PdfWriter(dest);
@@ -273,10 +274,16 @@ public class GemaltoToken implements Token {
         SignatureUtil signatureUtil = new SignatureUtil(pdfDoc);
         List<String> names = signatureUtil.getSignatureNames();
         String sigName = names.get(names.size() - 1);
-        //PdfPKCS7 pkcs7 = signatureUtil.readSignatureData(sigName);
-        for (String name : names) {
-            v.addVerification(name, ocsp, crl, LtvVerification.CertificateOption.WHOLE_CHAIN,
-                    LtvVerification.Level.OCSP_CRL, LtvVerification.CertificateInclusion.NO);
+        PdfPKCS7 pkcs7 = signatureUtil.verifySignature(sigName);
+
+        if (pkcs7.isTsp()) {
+            v.addVerification(sigName, ocsp, crl, LtvVerification.CertificateOption.WHOLE_CHAIN,
+                   timestapLevel, LtvVerification.CertificateInclusion.YES);
+        } else {
+            for (String name : names) {
+                v.addVerification(name, ocsp, crl, LtvVerification.CertificateOption.WHOLE_CHAIN,
+                        signatureLevel, LtvVerification.CertificateInclusion.YES);
+            }
         }
         v.merge();
 
