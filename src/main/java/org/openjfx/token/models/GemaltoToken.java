@@ -207,6 +207,7 @@ public class GemaltoToken implements Token {
 
         // Creating the reader and the stamper
         PdfReader reader = new PdfReader(src);
+        reader.setUnethicalReading(true);
         //Rectangle lala = reader.getPageSize(reader.getNumberOfPages());
         FileOutputStream os = new FileOutputStream(dest);
 
