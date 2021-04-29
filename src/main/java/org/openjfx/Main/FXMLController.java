@@ -140,7 +140,7 @@ public class FXMLController implements Initializable {
             Iterator<FilesToBeSigned> listFilesSrc = listitems.iterator();
             FilesToBeSigned fileSrc;
 
-            while(listFilesSrc.hasNext()){
+            while(listFilesSrc.hasNext()) {
                 fileSrc = listFilesSrc.next();
                 if (fileSrc.getChecked().isSelected()) {
                     try {
@@ -333,6 +333,7 @@ public class FXMLController implements Initializable {
                 posX = Integer.parseInt(json.get("posX").toString());
                 posY = Integer.parseInt(json.get("posY").toString());
                 ll = new WorkflowFile(id, year, type, number, description, posX, posY);
+                ll.setPosition();
                 file = new FilesToBeSigned(ll);
                 listitems.add(file);
                 file.updateGraphicStatus();
