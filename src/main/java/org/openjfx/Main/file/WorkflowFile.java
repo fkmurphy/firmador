@@ -1,5 +1,6 @@
 package org.openjfx.Main.file;
 
+import org.json.JSONObject;
 import org.openjfx.Main.file.exceptions.BadPasswordTokenException;
 import org.openjfx.backend.BackendConnection;
 import org.openjfx.Main.file.helpers.PathHelper;
@@ -7,6 +8,7 @@ import org.openjfx.infrastructure.Log;
 import org.openjfx.token.models.Token;
 
 import java.io.IOException;
+import java.net.http.HttpResponse;
 import java.security.GeneralSecurityException;
 
 
@@ -67,6 +69,8 @@ public class WorkflowFile implements FileRepository {
             return false;
         }
 
+        setPosition();
+
         String dstFilename = PathHelper.generateDestionationPath(srcPath);
         if (dstFilename != null && dstFilename != ""){
             try {
@@ -92,6 +96,28 @@ public class WorkflowFile implements FileRepository {
             );
             return false;
         }
+    }
+
+    public void setPosition()
+    {
+        BackendConnection bk = BackendConnection.get();
+        try {
+            HttpResponse<String> response = bk.getRequest("/signers/" + this.id + "/position");
+            if (response.statusCode() != 200) {
+                throw new Exception("Hubo un problema al comunicarse con el servidor");
+            }
+            JSONObject body = new JSONObject(response.body());
+            posX = (int) body.get("llx");
+            posY = (int) body.get("lly");
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+
     }
 
 }
