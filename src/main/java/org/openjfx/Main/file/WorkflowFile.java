@@ -69,11 +69,11 @@ public class WorkflowFile implements FileRepository {
             return false;
         }
 
-        setPosition();
 
         String dstFilename = PathHelper.generateDestionationPath(srcPath);
         if (dstFilename != null && dstFilename != ""){
             try {
+                setPosition(); // define position signer
                 token.signWithPositionStamper(srcPath, dstFilename, posX, posY);
             } catch (GeneralSecurityException e) {
                 LOGGER.warning("ERROR, sign document: "
@@ -98,23 +98,20 @@ public class WorkflowFile implements FileRepository {
         }
     }
 
-    public void setPosition()
-    {
+    public void setPosition() throws Exception {
         BackendConnection bk = BackendConnection.get();
         try {
             HttpResponse<String> response = bk.getRequest("/signers/" + this.id + "/position");
             if (response.statusCode() != 200) {
-                throw new Exception("Hubo un problema al comunicarse con el servidor");
+                throw new Exception("Hubo un problema al obtener la posición de la estampa desde el servicio. La respuesta obtuvo un código diferente a 200.");
             }
             JSONObject body = new JSONObject(response.body());
             posX = (int) body.get("llx");
             posY = (int) body.get("lly");
         } catch (IOException e) {
-            e.printStackTrace();
+            throw new Exception("Hubo un problema al obtener la posición de la estampa desde el servicio.");
         } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (Exception e) {
-            e.printStackTrace();
+
         }
 
 

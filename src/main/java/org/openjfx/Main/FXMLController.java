@@ -333,7 +333,6 @@ public class FXMLController implements Initializable {
                 posX = Integer.parseInt(json.get("posX").toString());
                 posY = Integer.parseInt(json.get("posY").toString());
                 ll = new WorkflowFile(id, year, type, number, description, posX, posY);
-                ll.setPosition();
                 file = new FilesToBeSigned(ll);
                 listitems.add(file);
                 file.updateGraphicStatus();
