@@ -11,5 +11,7 @@
       <Hyperlink alignment="CENTER" layoutX="42.0" layoutY="233.0" prefHeight="23.0" prefWidth="318.0" text="Manual de uso" />
       <Label alignment="CENTER" contentDisplay="CENTER" layoutX="37.0" layoutY="206.0" prefHeight="27.0" prefWidth="327.0" text="Para obtener ayuda:" />
       <Label alignment="CENTER" contentDisplay="CENTER" layoutX="37.0" layoutY="256.0" prefHeight="27.0" prefWidth="327.0" text="informatica@tribcuentasrionegro.gov.ar" />
+      <Label fx:id="version" alignment="CENTER" contentDisplay="CENTER" layoutX="37.0" layoutY="275.0" prefHeight="27.0" prefWidth="327.0" text="" />
+
    </children>
 </AnchorPane>

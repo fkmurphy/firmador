@@ -431,12 +431,15 @@ public class FXMLController implements Initializable {
     @FXML
     public void actionOpenAbout()
     {
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("about.fxml"));
+        FXMLLoader loader = new FXMLLoader();
+        loader.setLocation(getClass().getResource("about.fxml"));
         Parent root = null;
         try {
+            loader.setController(new AboutController());
             root = (Parent) loader.load();
             Scene scene = new Scene(root);
             Stage aboutStage = new Stage();
+
             aboutStage.initModality(Modality.APPLICATION_MODAL);
             aboutStage.setTitle("Más información");
             aboutStage.setScene(scene);
