@@ -6,6 +6,8 @@ import com.itextpdf.kernel.pdf.PdfReader;
 import com.itextpdf.kernel.pdf.PdfWriter;
 import com.itextpdf.kernel.pdf.StampingProperties;
 import com.itextpdf.signatures.*;
+import com.itextpdf.io.image.ImageDataFactory;
+import org.openjfx.Main.FXMLController;
 import org.openjfx.Main.Start;
 import org.openjfx.Main.file.exceptions.BadPasswordTokenException;
 import org.openjfx.infrastructure.Log;
@@ -213,9 +215,15 @@ public class GemaltoToken implements Token {
 
         PdfSigner signer = new PdfSigner(reader, new FileOutputStream(dest), new StampingProperties());
 
-        Rectangle rect = new Rectangle(posX, posY, posX+120, posY + 40);
+        Rectangle rect = new Rectangle(posX, posY, posX+320, posY + 40);
         PdfSignatureAppearance appearance = signer.getSignatureAppearance();
         appearance.setLayer2FontSize(5f);
+        appearance.setRenderingMode(PdfSignatureAppearance.RenderingMode.GRAPHIC_AND_DESCRIPTION);
+        appearance.setSignatureGraphic(ImageDataFactory.create(FXMLController.class.getResource("telegram.png")));
+        appearance.setImageScale(-1);
+        appearance.setReasonCaption("QWEQWEQWE");
+        // appearance.setLayer2Text("Replace default text");
+
         //appearance.setLayer2Font(PdfFontFactory.createFont("Arial", "ISO-8859-1", true));
 
 
@@ -240,9 +248,8 @@ public class GemaltoToken implements Token {
         // 40+120 | 40 + 40
         //appearance.setVisibleSignature(new Rectangle(posX, posY, posX+120, posY+40), lastPage, "sig"+ (new Random()).nextInt(25));
 
-       int lastPage = appearance.getPageNumber();
         appearance.setPageRect(rect)
-                .setPageNumber(lastPage)
+                .setPageNumber(signer.getDocument().getNumberOfPages())
                 .setReason(reason)
                 .setLocation(location);
 
