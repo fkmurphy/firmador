@@ -5,6 +5,14 @@ import com.itextpdf.kernel.pdf.PdfDocument;
 import com.itextpdf.kernel.pdf.PdfReader;
 import com.itextpdf.kernel.pdf.PdfWriter;
 import com.itextpdf.kernel.pdf.StampingProperties;
+import com.itextpdf.kernel.pdf.canvas.PdfCanvas;
+import com.itextpdf.kernel.pdf.extgstate.PdfExtGState;
+import com.itextpdf.layout.Canvas;
+import com.itextpdf.layout.element.Image;
+import com.itextpdf.layout.element.Paragraph;
+import com.itextpdf.kernel.colors.ColorConstants;
+import com.itextpdf.kernel.pdf.xobject.PdfFormXObject;
+import com.itextpdf.layout.property.HorizontalAlignment;
 import com.itextpdf.signatures.*;
 import com.itextpdf.io.image.ImageDataFactory;
 import org.openjfx.Main.FXMLController;
@@ -217,11 +225,7 @@ public class GemaltoToken implements Token {
 
         Rectangle rect = new Rectangle(posX, posY, posX+320, posY + 40);
         PdfSignatureAppearance appearance = signer.getSignatureAppearance();
-        appearance.setLayer2FontSize(5f);
-        appearance.setRenderingMode(PdfSignatureAppearance.RenderingMode.GRAPHIC_AND_DESCRIPTION);
-        appearance.setSignatureGraphic(ImageDataFactory.create(FXMLController.class.getResource("telegram.png")));
-        appearance.setImageScale(-1);
-        appearance.setReasonCaption("QWEQWEQWE");
+
         // appearance.setLayer2Text("Replace default text");
 
         //appearance.setLayer2Font(PdfFontFactory.createFont("Arial", "ISO-8859-1", true));
@@ -252,6 +256,35 @@ public class GemaltoToken implements Token {
                 .setPageNumber(signer.getDocument().getNumberOfPages())
                 .setReason(reason)
                 .setLocation(location);
+        PdfFormXObject n0 = appearance.getLayer0();
+        //float x = n0.getBBox().toRectangle().getLeft();
+        //float y = n0.getBBox().toRectangle().getBottom();
+        float x = posX;
+        //float width = n0.getBBox().toRectangle().getWidth();
+        float y = posY;
+        //float height = n0.getBBox().toRectangle().getHeight();
+        float width = posX + 120;
+        float height = posY + 40;
+        PdfCanvas canvas = new PdfCanvas(n0, signer.getDocument());
+        canvas.setFillColor(ColorConstants.LIGHT_GRAY);
+        //canvas.setExtGState(new PdfExtGState().setFillOpacity(0));
+        Rectangle rectangle = new Rectangle(x, y, width, height);
+        canvas.fill();
+        Canvas canvasObject = new Canvas(canvas, signer.getDocument(), rectangle)
+                .setHorizontalAlignment(HorizontalAlignment.CENTER);
+        canvasObject.add(
+                new Image(ImageDataFactory.create(FXMLController.class.getResource("telegram.png")), 20,  20, 20)
+        );
+        // Set the signature information on layer 2
+        PdfFormXObject n2 = appearance.getLayer2();
+
+        Paragraph p = new Paragraph("This asdaaaa was signed by asd aads.").setFontSize(5f)
+                //.setFixedPosition(posX, (posY +40 + posY) / 2 - width / 2, posX + 120 - posX)
+                //.setFontSize(10f)
+                .setFontColor(ColorConstants.BLACK);
+        canvasObject.add(p);
+        canvasObject.flush();
+
 
         // signature IExternalSignature pks = new PrivateKeySignature(pk, digestAlgorithm, provider);
 
@@ -266,6 +299,7 @@ public class GemaltoToken implements Token {
               //  null, null, null, 0, subfilter);
 
         //stamper.close();
+        signer.getDocument().close();
         reader.close();
         os.close();
         //OCSPVerifier ocspVerifier = new OCSPVerifier(null, null);

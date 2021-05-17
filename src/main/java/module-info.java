@@ -15,6 +15,7 @@ module org.openjfx {
     requires sign;
     requires kernel;
     requires io;
+    requires layout;
 
     opens org.openjfx.Main.models to javafx.base;
     opens org.openjfx.Main;
