@@ -1,5 +1,7 @@
 package org.openjfx.token.models;
 
+import com.itextpdf.kernel.font.PdfFont;
+import com.itextpdf.kernel.font.PdfFontFactory;
 import com.itextpdf.kernel.geom.Rectangle;
 import com.itextpdf.kernel.pdf.PdfDocument;
 import com.itextpdf.kernel.pdf.PdfReader;
@@ -8,10 +10,12 @@ import com.itextpdf.kernel.pdf.StampingProperties;
 import com.itextpdf.kernel.pdf.canvas.PdfCanvas;
 import com.itextpdf.kernel.pdf.extgstate.PdfExtGState;
 import com.itextpdf.layout.Canvas;
+import com.itextpdf.layout.borders.SolidBorder;
 import com.itextpdf.layout.element.Image;
 import com.itextpdf.layout.element.Paragraph;
 import com.itextpdf.kernel.colors.ColorConstants;
 import com.itextpdf.kernel.pdf.xobject.PdfFormXObject;
+import com.itextpdf.layout.element.Text;
 import com.itextpdf.layout.property.HorizontalAlignment;
 import com.itextpdf.signatures.*;
 import com.itextpdf.io.image.ImageDataFactory;
@@ -27,6 +31,7 @@ import java.security.*;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 public class GemaltoToken implements Token {
@@ -203,6 +208,8 @@ public class GemaltoToken implements Token {
             // TODO: 6/10/20 excepcion por null
 
         } catch (IOException e) {
+            System.out.println(e.toString());
+
             throw new BadPasswordTokenException();
         }
 
@@ -223,7 +230,6 @@ public class GemaltoToken implements Token {
 
         PdfSigner signer = new PdfSigner(reader, new FileOutputStream(dest), new StampingProperties());
 
-        Rectangle rect = new Rectangle(posX, posY, posX+320, posY + 40);
         PdfSignatureAppearance appearance = signer.getSignatureAppearance();
 
         // appearance.setLayer2Text("Replace default text");
@@ -252,38 +258,40 @@ public class GemaltoToken implements Token {
         // 40+120 | 40 + 40
         //appearance.setVisibleSignature(new Rectangle(posX, posY, posX+120, posY+40), lastPage, "sig"+ (new Random()).nextInt(25));
 
-        appearance.setPageRect(rect)
+        appearance
                 .setPageNumber(signer.getDocument().getNumberOfPages())
                 .setReason(reason)
                 .setLocation(location);
-        PdfFormXObject n0 = appearance.getLayer0();
-        //float x = n0.getBBox().toRectangle().getLeft();
-        //float y = n0.getBBox().toRectangle().getBottom();
-        float x = posX;
-        //float width = n0.getBBox().toRectangle().getWidth();
-        float y = posY;
-        //float height = n0.getBBox().toRectangle().getHeight();
-        float width = posX + 120;
-        float height = posY + 40;
-        PdfCanvas canvas = new PdfCanvas(n0, signer.getDocument());
-        canvas.setFillColor(ColorConstants.LIGHT_GRAY);
-        //canvas.setExtGState(new PdfExtGState().setFillOpacity(0));
-        Rectangle rectangle = new Rectangle(x, y, width, height);
-        canvas.fill();
-        Canvas canvasObject = new Canvas(canvas, signer.getDocument(), rectangle)
-                .setHorizontalAlignment(HorizontalAlignment.CENTER);
-        canvasObject.add(
-                new Image(ImageDataFactory.create(FXMLController.class.getResource("telegram.png")), 20,  20, 20)
-        );
-        // Set the signature information on layer 2
-        PdfFormXObject n2 = appearance.getLayer2();
+        Rectangle rect = new Rectangle(posX, posY, posX + 120, posY + 40);
+        appearance.setPageRect(rect);
+        //signer.setFieldName("sign");
+        PdfFormXObject layer2 = appearance.getLayer2();
+        PdfCanvas canvas = new PdfCanvas(layer2, signer.getDocument()).setFillColor(ColorConstants.LIGHT_GRAY);
 
-        Paragraph p = new Paragraph("This asdaaaa was signed by asd aads.").setFontSize(5f)
-                //.setFixedPosition(posX, (posY +40 + posY) / 2 - width / 2, posX + 120 - posX)
-                //.setFontSize(10f)
-                .setFontColor(ColorConstants.BLACK);
-        canvasObject.add(p);
-        canvasObject.flush();
+        float MARGIN = 1;
+        PdfFont font = PdfFontFactory.createFont();
+
+
+        Rectangle dataRect = new Rectangle(rect.getX() + MARGIN / 2, 10, rect.getWidth() / 2 - MARGIN, rect.getHeight() - 2 * MARGIN);
+        try (Canvas layoutCanvas = new Canvas(canvas, signer.getDocument(), dataRect);) {
+            Paragraph paragraph = new Paragraph().setFont(font).setMarginTop(35).setMultipliedLeading(0.9f);
+            paragraph.add(
+                    new Image(ImageDataFactory.create(FXMLController.class.getResource("sign_blank.png")),
+                            dataRect.getWidth() / 2 + MARGIN,
+                            dataRect.getHeight() - 20,
+                            22f)
+            );
+
+            paragraph.add(new Text( CertificateInfo.getSubjectFields((X509Certificate) chain[0]).getField("CN") + '\n').setFontSize(5));
+            paragraph.add(new Text("Fecha: " + new SimpleDateFormat("dd.MM.yyyy HH:mm:ss z").format(signer.getSignDate().getTime()) + '\n').setFontSize(5));
+            paragraph.add(new Text("Lugar: " + appearance.getLocation()).setFontSize(5));
+
+            //paragraph.add(new Text("Razon: " + appearance.getReason() + '\n').setFontSize(6));
+
+            layoutCanvas.add(paragraph);
+            layoutCanvas.setBorder(new SolidBorder(ColorConstants.BLACK,2));
+
+        }
 
 
         // signature IExternalSignature pks = new PrivateKeySignature(pk, digestAlgorithm, provider);
