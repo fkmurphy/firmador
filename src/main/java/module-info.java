@@ -4,6 +4,7 @@ module org.openjfx {
     requires javafx.fxml;
     requires jdk.crypto.cryptoki;
     // requires bcprov.jdk15on;
+    requires org.slf4j;
     requires org.bouncycastle.pkix;
     requires org.bouncycastle.provider;
     requires java.net.http;

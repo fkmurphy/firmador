@@ -15,6 +15,8 @@ import java.security.GeneralSecurityException;
 public class WorkflowFile implements FileRepository {
     int id, year, type, number, posX, posY;
     String description;
+    String descriptionSignature;
+    String imageSignature;
     private final static Log LOGGER = new Log();
 
     public WorkflowFile(int id, int year, int type, int number, String description, int posX, int posY) {
@@ -25,6 +27,8 @@ public class WorkflowFile implements FileRepository {
         this.description = description;
         this.posX = posX;
         this.posY = posY;
+        this.descriptionSignature = null;
+        this.imageSignature = null;
     }
 
     public WorkflowFile(int id, int year, int type, int number) {
@@ -69,12 +73,12 @@ public class WorkflowFile implements FileRepository {
             return false;
         }
 
-
         String dstFilename = PathHelper.generateDestionationPath(srcPath);
         if (dstFilename != null && dstFilename != ""){
             try {
                 setPosition(); // define position signer
-                token.signWithPositionStamper(srcPath, dstFilename, posX, posY);
+                setSignatureInfo();
+                token.signWithPositionStamper(srcPath, dstFilename, posX, posY, imageSignature,descriptionSignature);
             } catch (GeneralSecurityException e) {
                 LOGGER.warning("ERROR, sign document: "
                         + this.id
@@ -84,6 +88,7 @@ public class WorkflowFile implements FileRepository {
                 );
                 return false;
             } catch (Exception e) {
+                e.printStackTrace();
                 return false;
             }
             BackendConnection.get().sendFile(dstFilename,this.id);
@@ -98,10 +103,30 @@ public class WorkflowFile implements FileRepository {
         }
     }
 
+    private void setSignatureInfo() throws Exception {
+        BackendConnection bk = BackendConnection.get();
+        try {
+            HttpResponse<String> response = bk.getRequest( "/people/signature-info");
+            if (response.statusCode() != 200) {
+                throw new Exception("Hubo un problema al obtener información para la estampa.");
+            }
+            JSONObject body = new JSONObject(response.body());
+            imageSignature = (String) body.get("holographic_signature");
+            descriptionSignature = (String) body.get("description_signature");
+        } catch (IOException e) {
+            e.printStackTrace();
+
+            throw new Exception("Hubo un problema al obtener la posición de la estampa desde el servicio.");
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+    }
+
     public void setPosition() throws Exception {
         BackendConnection bk = BackendConnection.get();
         try {
-            HttpResponse<String> response = bk.getRequest("/signers/" + this.id + "/position");
+            HttpResponse<String> response = bk.getRequest( "/signers/" + this.id + "/position");
             if (response.statusCode() != 200) {
                 throw new Exception("Hubo un problema al obtener la posición de la estampa desde el servicio. La respuesta obtuvo un código diferente a 200.");
             }
@@ -113,8 +138,6 @@ public class WorkflowFile implements FileRepository {
         } catch (InterruptedException e) {
 
         }
-
-
     }
 
 }
