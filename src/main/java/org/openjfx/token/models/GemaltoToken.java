@@ -1,6 +1,9 @@
 package org.openjfx.token.models;
 
 import com.itextpdf.io.image.ImageData;
+import com.itextpdf.kernel.colors.Color;
+import com.itextpdf.kernel.colors.DeviceCmyk;
+import com.itextpdf.kernel.colors.DeviceGray;
 import com.itextpdf.kernel.font.PdfFont;
 import com.itextpdf.kernel.font.PdfFontFactory;
 import com.itextpdf.kernel.geom.Rectangle;
@@ -10,12 +13,15 @@ import com.itextpdf.kernel.pdf.PdfWriter;
 import com.itextpdf.kernel.pdf.StampingProperties;
 import com.itextpdf.kernel.pdf.canvas.PdfCanvas;
 import com.itextpdf.layout.Canvas;
+import com.itextpdf.layout.borders.Border;
+import com.itextpdf.layout.borders.DashedBorder;
 import com.itextpdf.layout.borders.SolidBorder;
-import com.itextpdf.layout.element.Image;
-import com.itextpdf.layout.element.Paragraph;
+import com.itextpdf.layout.element.*;
 import com.itextpdf.kernel.colors.ColorConstants;
 import com.itextpdf.kernel.pdf.xobject.PdfFormXObject;
-import com.itextpdf.layout.element.Text;
+import com.itextpdf.layout.property.HorizontalAlignment;
+import com.itextpdf.layout.property.TextAlignment;
+import com.itextpdf.layout.property.UnitValue;
 import com.itextpdf.signatures.*;
 import com.itextpdf.io.image.ImageDataFactory;
 import org.openjfx.Main.FXMLController;
@@ -30,6 +36,7 @@ import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.List;
 
 public class GemaltoToken implements Token {
 
@@ -200,7 +207,6 @@ public class GemaltoToken implements Token {
                                 providerName
                         );
             }
-            System.out.println("saaaale a firmar chabon");
             processSign(src, dst, chain,privKey, DigestAlgorithms.SHA256,
                     getProvider().getName(),
                     PdfSigner.CryptoStandard.CADES,
@@ -282,31 +288,107 @@ public class GemaltoToken implements Token {
         PdfCanvas canvas = new PdfCanvas(layer2, signer.getDocument()).setFillColor(ColorConstants.LIGHT_GRAY);
 
         float MARGIN = 1;
-        PdfFont font = PdfFontFactory.createFont();
         ImageData image;
         if (stampImage != null) {
             image = ImageDataFactory.create(stampImage);
         } else {
             image= ImageDataFactory.create(FXMLController.class.getResource("sign_blank.png"));
         }
-        Rectangle dataRect = new Rectangle(rect.getX() + MARGIN / 2, 10, rect.getWidth() / 2 - MARGIN, rect.getHeight() - 2 * MARGIN);
+        Color greenColor = new DeviceCmyk(1.f, 0.f, 1.f, 1f);
+
+        //Rectangle dataRect = new Rectangle(rect.getX() + MARGIN / 2, 10, rect.getWidth() / 2 - MARGIN, rect.getHeight() - 2 * MARGIN);
+        //try (Canvas layoutCanvas = new Canvas(canvas, signer.getDocument(), dataRect);) {
+
+        Rectangle dataRect = new Rectangle(0, 0, rect.getWidth(), rect.getHeight());
+        canvas.fill();
         try (Canvas layoutCanvas = new Canvas(canvas, signer.getDocument(), dataRect);) {
-            Paragraph paragraph = new Paragraph().setFont(font).setMarginTop(35).setMultipliedLeading(0.9f);
-            paragraph.add(
+
+
+            float[] columnWidths = {3, 1};
+            Table table = new Table(columnWidths);
+
+            //name
+            Paragraph name = new Paragraph();
+            name.add(
+                    (new Text("Murphy Néstor Julián"))
+                            .setFontColor(ColorConstants.BLACK)
+                            .setFontSize(10f)
+                            .setStrokeWidth(0.5f)
+                            .setStrokeColor(DeviceGray.BLACK)
+            );
+            //.setBorder(new DashedBorder(greenColor,1,1));
+            //.setWidth(dataRect.getWidth() / 3);
+            table.addCell(
+                    (new Cell())
+                    .setBorder(Border.NO_BORDER)
+                    .add(name)
+            );
+
+            //signature  info
+            Paragraph sign = new Paragraph()
+                    //.setMultipliedLeading(0.9f)
+                    .setFontColor(ColorConstants.BLACK)
+                    .setHorizontalAlignment(HorizontalAlignment.RIGHT);
+            sign.add(new Text( CertificateInfo.getSubjectFields((X509Certificate) chain[0])
+                    .getField("CN") + '\n')
+                    .setFontColor(ColorConstants.BLACK)
+                    .setFontSize(6)
+            );
+            sign.add(new Text("Fecha: " + new SimpleDateFormat("dd.MM.yyyy HH:mm:ss z")
+                    .format(signer.getSignDate().getTime()) + '\n')
+                    .setFontColor(ColorConstants.BLACK)
+                    .setFontSize(6)
+            )//.setBorder(new DashedBorder(greenColor,1,1))
+            .setWidth(dataRect.getWidth() / 3);
+
+            table.addCell(
+                    (new Cell())
+                    .setBorder(Border.NO_BORDER).add(sign)
+            );
+
+
+
+            layoutCanvas.add(table);
+            Paragraph position = new Paragraph();
+            position.add(
+                    (new Text("Licenciado en casi todo."))
+                            .setFontColor(ColorConstants.BLACK)
+                            .setFontSize(7f)
+            ).setTextAlignment(TextAlignment.CENTER)
+            ;
+            layoutCanvas.add(position);
+
+            Paragraph locationP = new Paragraph();
+            locationP.add(
+                    (new Text("Tribunal de Cuentas de la provincia de Río Negro"))
+                            .setFontColor(ColorConstants.BLACK)
+                            .setFontSize(7f)
+            )
+            .setMarginTop(0)
+            //.setBorder(new DashedBorder(greenColor,1,1))
+            .setTextAlignment(TextAlignment.CENTER);
+
+            layoutCanvas.add(locationP);
+
+            /*paragraph.add(
                     new Image(image,
                             rect.getWidth() / 2 ,
                             dataRect.getHeight() - 20,
                             22f)
-            );
+            );*/
 
-            paragraph.add(new Text( CertificateInfo.getSubjectFields((X509Certificate) chain[0]).getField("CN") + '\n').setFontSize(5));
-            paragraph.add(new Text("Fecha: " + new SimpleDateFormat("dd.MM.yyyy HH:mm:ss z").format(signer.getSignDate().getTime()) + '\n').setFontSize(5));
-            paragraph.add(new Text("Lugar: " + appearance.getLocation() + '\n').setFontSize(5));
 
-            paragraph.add(new Text( appearance.getReason() + '\n').setFontSize(5));
+            //paragraph.add(new Text("Lugar: " + appearance.getLocation() + '\n').setFontSize(5));
 
-            layoutCanvas.add(paragraph);
-            layoutCanvas.setBorder(new SolidBorder(ColorConstants.BLACK,2));
+
+            //paragraph.add(new Text( appearance.getReason() + '\n').setFontSize(5));
+            //paragraph.setBorder(new DashedBorder(greenColor,1,1));
+
+
+            //paragraph.add(new Text("Julian <br/> Murphy"));
+
+            //layoutCanvas.add(paragraph);
+            //layoutCanvas.setBorder(new SolidBorder(ColorConstants.BLACK,2));
 
         }
 

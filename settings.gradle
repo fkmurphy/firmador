@@ -1,1 +1,4 @@
 rootProject.name = 'hellofx'
+include 'test'
+include 'java'
+

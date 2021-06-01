@@ -29,6 +29,14 @@ dependencies {
 }
 
 mainClassName = 'org.openjfx.MainApp'
+sourceSets {
+    main {
+        java {
+            srcDir 'src/main/java'
+        }
+    }
+
+}
 
 
 def PROPERTIES_FILE = "config.properties"
@@ -132,9 +140,3 @@ task fatJar(type: Jar) {
     }
     with jar
 }*/
-allprojects {
-    compileJava {
-        options.forkOptions.javaHome = file(System.properties['java.home'])
-    }
-
-}
