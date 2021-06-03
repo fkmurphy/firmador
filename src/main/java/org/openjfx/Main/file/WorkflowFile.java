@@ -119,9 +119,9 @@ public class WorkflowFile implements FileRepository {
             JSONObject body = new JSONObject(response.body());
             imageSignature = body.has("holographic_signature") ? (String) body.get("holographic_signature") : "";
             descriptionSignature = body.has("description_signature") ? (String) body.get("description_signature") : "";
-            nameSignature = body.has("name") ? (String) body.get("name") : "";
-            occupationSignature = body.has("occupation") ? (String) body.get("occupation") : "";
-            locationSignature = body.has("location") ?  (String) body.get("location") : "";
+            nameSignature = body.has("lastname_name") ? (String) body.get("lastname_name") : "";
+            occupationSignature = body.has("occupation_signature") ? (String) body.get("occupation_signature") : "";
+            locationSignature = body.has("location_signature") ?  (String) body.get("location_signature") : "";
         } catch (IOException e) {
             e.printStackTrace();
 
