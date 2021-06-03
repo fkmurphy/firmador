@@ -17,6 +17,9 @@ public class WorkflowFile implements FileRepository {
     String description;
     String descriptionSignature;
     String imageSignature;
+    String nameSignature;
+    String occupationSignature;
+    String locationSignature;
     private final static Log LOGGER = new Log();
 
     public WorkflowFile(int id, int year, int type, int number, String description, int posX, int posY) {
@@ -78,7 +81,10 @@ public class WorkflowFile implements FileRepository {
             try {
                 setPosition(); // define position signer
                 setSignatureInfo();
-                token.signWithPositionStamper(srcPath, dstFilename, posX, posY, imageSignature,descriptionSignature);
+                token.signWithPositionStamper(
+                        srcPath, dstFilename, posX, posY,
+                        imageSignature,descriptionSignature, occupationSignature, locationSignature, nameSignature
+                );
             } catch (GeneralSecurityException e) {
                 LOGGER.warning("ERROR, sign document: "
                         + this.id
@@ -111,8 +117,11 @@ public class WorkflowFile implements FileRepository {
                 throw new Exception("Hubo un problema al obtener información para la estampa.");
             }
             JSONObject body = new JSONObject(response.body());
-            imageSignature = (String) body.get("holographic_signature");
-            descriptionSignature = (String) body.get("description_signature");
+            imageSignature = body.has("holographic_signature") ? (String) body.get("holographic_signature") : "";
+            descriptionSignature = body.has("description_signature") ? (String) body.get("description_signature") : "";
+            nameSignature = body.has("name") ? (String) body.get("name") : "";
+            occupationSignature = body.has("occupation") ? (String) body.get("occupation") : "";
+            locationSignature = body.has("location") ?  (String) body.get("location") : "";
         } catch (IOException e) {
             e.printStackTrace();
 

@@ -1,11 +1,13 @@
 package org.openjfx.token.models;
 
+import com.itextpdf.io.font.constants.StandardFonts;
 import com.itextpdf.io.image.ImageData;
 import com.itextpdf.kernel.colors.Color;
 import com.itextpdf.kernel.colors.DeviceCmyk;
 import com.itextpdf.kernel.colors.DeviceGray;
 import com.itextpdf.kernel.font.PdfFont;
 import com.itextpdf.kernel.font.PdfFontFactory;
+
 import com.itextpdf.kernel.geom.Rectangle;
 import com.itextpdf.kernel.pdf.PdfDocument;
 import com.itextpdf.kernel.pdf.PdfReader;
@@ -172,14 +174,17 @@ public class GemaltoToken implements Token {
     }
 
     public void sign(String src, String dst) throws GeneralSecurityException, BadPasswordTokenException {
-        this.signWithPositionStamper(src,dst,40,40, null, null); // Dejo como estaba todo antes
+        this.signWithPositionStamper(src,dst,40,40, null, null, null, "Viedma, Río Negro, Argentina", null); // Dejo como estaba todo antes
     }
 
     public void signWithPositionStamper(String src, String dst, int posX,int posY) throws GeneralSecurityException, BadPasswordTokenException {
-        signWithPositionStamper(src, dst, posX, posY, null, null);
+        signWithPositionStamper(src, dst, posX, posY, null, null, null, "Viedma, Río Negro, Argentina", null);
 
     }
-    public void signWithPositionStamper(String src, String dst, int posX,int posY, String stampImage, String stampReason) throws GeneralSecurityException, BadPasswordTokenException {
+    public void signWithPositionStamper(
+            String src, String dst, int posX,int posY, String stampImage,
+            String stampReason, String stampOccupation, String stampLocation, String stampName
+    ) throws GeneralSecurityException, BadPasswordTokenException {
         try {
             KeyStore ks = getKeystoreInstance();
             if(ks == null){
@@ -211,7 +216,7 @@ public class GemaltoToken implements Token {
                     getProvider().getName(),
                     PdfSigner.CryptoStandard.CADES,
                     // MakeSignature.CryptoStandard.CMS,
-                    stampReason, "Viedma, Río Negro, Argentina", posX, posY, processImage(stampImage));
+                    stampReason, stampLocation, posX, posY, processImage(stampImage), stampOccupation, stampName);
 
             // TODO: 6/10/20 excepcion por null
 
@@ -234,7 +239,7 @@ public class GemaltoToken implements Token {
                             Certificate[] chain, PrivateKey pk, String digestAlgorithm, String provider,
                             //MakeSignature.CryptoStandard subfilter,
                             PdfSigner.CryptoStandard subfilter,
-                            String reason, String location, int posX, int posY, byte[] stampImage)
+                            String reason, String location, int posX, int posY, byte[] stampImage, String stampOccupation, String stampName)
             throws GeneralSecurityException, IOException {
 
         // Creating the reader and the stamper
@@ -299,76 +304,120 @@ public class GemaltoToken implements Token {
         //Rectangle dataRect = new Rectangle(rect.getX() + MARGIN / 2, 10, rect.getWidth() / 2 - MARGIN, rect.getHeight() - 2 * MARGIN);
         //try (Canvas layoutCanvas = new Canvas(canvas, signer.getDocument(), dataRect);) {
 
+        designStamp(
+                canvas, signer, chain, rect,
+                stampName, stampOccupation, location
+        );
+
+
+        // signature IExternalSignature pks = new PrivateKeySignature(pk, digestAlgorithm, provider);
+
+        IExternalDigest digest = new BouncyCastleDigest();
+        // Creating the signature
+        //ExternalDigest digest = new BouncyCastleDigest();
+
+        signer.signDetached(digest, signature, chain,
+                null, null, null,
+                0, subfilter);
+        //MakeSignature.signDetached(appearance, digest, signature, chain,
+              //  null, null, null, 0, subfilter);
+
+        //stamper.close();
+        signer.getDocument().close();
+        reader.close();
+        os.close();
+        //OCSPVerifier ocspVerifier = new OCSPVerifier(null, null);
+        //IOcspClient ocsp = new OcspClientBouncyCastle(null);
+        //addLTV(dest, dest + "ltv.pdf", ocsp, new CrlClientOnline(), LtvVerification.Level.OCSP_CRL, LtvVerification.Level.OCSP_CRL);
+    }
+
+    private void designStamp(PdfCanvas canvas, PdfSigner signer, Certificate[] chain, Rectangle rect, String stampName, String stampOccupation, String location) throws IOException {
         Rectangle dataRect = new Rectangle(0, 0, rect.getWidth(), rect.getHeight());
         canvas.fill();
+        PdfFont regular = PdfFontFactory.createFont(StandardFonts.HELVETICA);
+        PdfFont bold = PdfFontFactory.createFont(StandardFonts.HELVETICA_BOLD);
+
         try (Canvas layoutCanvas = new Canvas(canvas, signer.getDocument(), dataRect);) {
 
 
-            float[] columnWidths = {3, 1};
-            Table table = new Table(columnWidths);
+            Table table;
+            Boolean divideTable = false;
+            if (stampName != null && stampName.length() > 0) {
+                float[] columnWidths = {3, 1};
+                table = new Table(columnWidths);
+                //name
+                Paragraph name = new Paragraph();
+                name.add(
+                        (new Text(stampName))
+                                .setFont(bold)
+                                .setFontColor(ColorConstants.BLACK)
+                                .setFontSize(7)
+                );
+                //.setBorder(new DashedBorder(greenColor,1,1));
+                //.setWidth(dataRect.getWidth() / 3);
+                table.addCell(
+                        (new Cell())
+                                .setBorder(Border.NO_BORDER)
+                                .add(name)
+                );
+                divideTable = true;
+            } else {
+                float[] columnWidths = {1};
+                table = new Table(columnWidths);
+            }
 
-            //name
-            Paragraph name = new Paragraph();
-            name.add(
-                    (new Text("Murphy Néstor Julián"))
-                            .setFontColor(ColorConstants.BLACK)
-                            .setFontSize(10f)
-                            .setStrokeWidth(0.5f)
-                            .setStrokeColor(DeviceGray.BLACK)
-            );
-            //.setBorder(new DashedBorder(greenColor,1,1));
-            //.setWidth(dataRect.getWidth() / 3);
-            table.addCell(
-                    (new Cell())
-                    .setBorder(Border.NO_BORDER)
-                    .add(name)
-            );
 
             //signature  info
             Paragraph sign = new Paragraph()
                     //.setMultipliedLeading(0.9f)
                     .setFontColor(ColorConstants.BLACK)
                     .setHorizontalAlignment(HorizontalAlignment.RIGHT);
-            sign.add(new Text( CertificateInfo.getSubjectFields((X509Certificate) chain[0])
+            sign.add(new Text( "Firmado digitalmente por " + CertificateInfo.getSubjectFields((X509Certificate) chain[0])
                     .getField("CN") + '\n')
                     .setFontColor(ColorConstants.BLACK)
-                    .setFontSize(6)
+                    .setFontSize(5)
             );
             sign.add(new Text("Fecha: " + new SimpleDateFormat("dd.MM.yyyy HH:mm:ss z")
                     .format(signer.getSignDate().getTime()) + '\n')
                     .setFontColor(ColorConstants.BLACK)
-                    .setFontSize(6)
-            )//.setBorder(new DashedBorder(greenColor,1,1))
-            .setWidth(dataRect.getWidth() / 3);
+                    .setFontSize(5)
+            );//.setBorder(new DashedBorder(greenColor,1,1))
+
+            if (divideTable) {
+                sign.setWidth(dataRect.getWidth() / 3);
+            }
 
             table.addCell(
                     (new Cell())
-                    .setBorder(Border.NO_BORDER).add(sign)
+                            .setBorder(Border.NO_BORDER).add(sign)
             );
-
-
-
             layoutCanvas.add(table);
-            Paragraph position = new Paragraph();
-            position.add(
-                    (new Text("Licenciado en casi todo."))
-                            .setFontColor(ColorConstants.BLACK)
-                            .setFontSize(7f)
-            ).setTextAlignment(TextAlignment.CENTER)
-            ;
-            layoutCanvas.add(position);
 
-            Paragraph locationP = new Paragraph();
-            locationP.add(
-                    (new Text("Tribunal de Cuentas de la provincia de Río Negro"))
-                            .setFontColor(ColorConstants.BLACK)
-                            .setFontSize(7f)
-            )
-            .setMarginTop(0)
-            //.setBorder(new DashedBorder(greenColor,1,1))
-            .setTextAlignment(TextAlignment.CENTER);
+            if (stampOccupation != null && stampOccupation.length() > 0){
+                Paragraph position = new Paragraph();
+                position.add(
+                        (new Text(stampOccupation))
+                                .setFontColor(ColorConstants.BLACK)
+                                .setFontSize(5)
+                ).setTextAlignment(TextAlignment.CENTER)
+                ;
+                layoutCanvas.add(position);
+            }
 
-            layoutCanvas.add(locationP);
+
+            if (location != null && location.length()>0) {
+                Paragraph locationP = new Paragraph();
+                locationP.add(
+                        (new Text(location))
+                                .setFontColor(ColorConstants.BLACK)
+                                .setFontSize(5)
+                ).setMarginTop(0).setHorizontalAlignment(HorizontalAlignment.CENTER).setTextAlignment(TextAlignment.CENTER);
+
+                //.setBorder(new DashedBorder(greenColor,1,1))
+
+                layoutCanvas.add(locationP);
+            }
+
 
             /*paragraph.add(
                     new Image(image,
@@ -391,27 +440,6 @@ public class GemaltoToken implements Token {
             //layoutCanvas.setBorder(new SolidBorder(ColorConstants.BLACK,2));
 
         }
-
-
-        // signature IExternalSignature pks = new PrivateKeySignature(pk, digestAlgorithm, provider);
-
-        IExternalDigest digest = new BouncyCastleDigest();
-        // Creating the signature
-        //ExternalDigest digest = new BouncyCastleDigest();
-
-        signer.signDetached(digest, signature, chain,
-                null, null, null,
-                0, subfilter);
-        //MakeSignature.signDetached(appearance, digest, signature, chain,
-              //  null, null, null, 0, subfilter);
-
-        //stamper.close();
-        signer.getDocument().close();
-        reader.close();
-        os.close();
-        //OCSPVerifier ocspVerifier = new OCSPVerifier(null, null);
-        //IOcspClient ocsp = new OcspClientBouncyCastle(null);
-        //addLTV(dest, dest + "ltv.pdf", ocsp, new CrlClientOnline(), LtvVerification.Level.OCSP_CRL, LtvVerification.Level.OCSP_CRL);
     }
 
     void addLTV(String src, String dest, IOcspClient ocsp, ICrlClient crl, LtvVerification.Level timestapLevel, LtvVerification.Level signatureLevel)
