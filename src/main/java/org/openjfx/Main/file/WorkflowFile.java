@@ -117,11 +117,11 @@ public class WorkflowFile implements FileRepository {
                 throw new Exception("Hubo un problema al obtener información para la estampa.");
             }
             JSONObject body = new JSONObject(response.body());
-            imageSignature = body.has("holographic_signature") ? (String) body.get("holographic_signature") : "";
-            descriptionSignature = body.has("description_signature") ? (String) body.get("description_signature") : "";
-            nameSignature = body.has("lastname_name") ? (String) body.get("lastname_name") : "";
-            occupationSignature = body.has("occupation_signature") ? (String) body.get("occupation_signature") : "";
-            locationSignature = body.has("location_signature") ?  (String) body.get("location_signature") : "";
+            imageSignature = body.has("holographic_signature") && !body.isNull("holographic_signature") ? (String) body.get("holographic_signature") : "";
+            descriptionSignature = body.has("description_signature") && !body.isNull("description_signature")  ? (String) body.get("description_signature") : "";
+            nameSignature = body.has("lastname_name") && !body.isNull("lastname_name")  ? (String) body.get("lastname_name") : "";
+            occupationSignature = body.has("occupation_signature") && !body.isNull("occupation_signature")  ? (String) body.get("occupation_signature") : "";
+            locationSignature = body.has("location_signature") && !body.isNull("location_signature") ?  (String) body.get("location_signature") : "";
         } catch (IOException e) {
             e.printStackTrace();
 
