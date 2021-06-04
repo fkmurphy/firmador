@@ -293,13 +293,13 @@ public class GemaltoToken implements Token {
         PdfCanvas canvas = new PdfCanvas(layer2, signer.getDocument()).setFillColor(ColorConstants.LIGHT_GRAY);
 
         float MARGIN = 1;
-        ImageData image;
-        if (stampImage != null) {
-            image = ImageDataFactory.create(stampImage);
-        } else {
-            image= ImageDataFactory.create(FXMLController.class.getResource("sign_blank.png"));
-        }
-        Color greenColor = new DeviceCmyk(1.f, 0.f, 1.f, 1f);
+        //ImageData image;
+        //if (stampImage != null) {
+        //    image = ImageDataFactory.create(stampImage);
+        //} else {
+        //    image= ImageDataFactory.create(FXMLController.class.getResource("sign_blank.png"));
+        //}
+        //Color greenColor = new DeviceCmyk(1.f, 0.f, 1.f, 1f);
 
         //Rectangle dataRect = new Rectangle(rect.getX() + MARGIN / 2, 10, rect.getWidth() / 2 - MARGIN, rect.getHeight() - 2 * MARGIN);
         //try (Canvas layoutCanvas = new Canvas(canvas, signer.getDocument(), dataRect);) {
@@ -338,7 +338,6 @@ public class GemaltoToken implements Token {
         PdfFont bold = PdfFontFactory.createFont(StandardFonts.HELVETICA_BOLD);
 
         try (Canvas layoutCanvas = new Canvas(canvas, signer.getDocument(), dataRect);) {
-
 
             Table table;
             Boolean divideTable = false;
@@ -391,7 +390,7 @@ public class GemaltoToken implements Token {
                     (new Cell())
                             .setBorder(Border.NO_BORDER).add(sign)
             );
-            layoutCanvas.add(table);
+            layoutCanvas.add(table.setHorizontalAlignment(HorizontalAlignment.CENTER));
 
             if (stampOccupation != null && stampOccupation.length() > 0){
                 Paragraph position = new Paragraph();
