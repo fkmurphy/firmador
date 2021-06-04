@@ -15,6 +15,10 @@ public interface Token {
     public Provider getProvider();
     public void sign(String src, String dst) throws GeneralSecurityException, BadPasswordTokenException;
     public void signWithPositionStamper(String src, String dst, int posX, int posY) throws GeneralSecurityException, BadPasswordTokenException;
-    public void signWithPositionStamper(String src, String dst, int posX, int posY, String stampImage, String stampReason) throws GeneralSecurityException, BadPasswordTokenException;
+    public void signWithPositionStamper(
+            String src, String dst,
+            int posX, int posY,
+            String stampImage, String stampReason, String stampOccupation, String stampLocation, String stampName
+    ) throws GeneralSecurityException, BadPasswordTokenException;
 
 }
