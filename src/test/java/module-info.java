@@ -1,5 +1,4 @@
-open module org.openjfx {
+module  test{
     requires org.junit.jupiter.api;
-    requires org.junit.platform.commons;
-    exports org.openjfx;
+    opens test;
 }
