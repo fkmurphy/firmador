@@ -174,7 +174,7 @@ public class GemaltoToken implements Token {
     }
 
     public void sign(String src, String dst) throws GeneralSecurityException, BadPasswordTokenException {
-        this.signWithPositionStamper(src,dst,40,40, null, null, null, "Viedma, Río Negro, Argentina", null); // Dejo como estaba todo antes
+        this.signWithPositionStamper(src,dst,140,40, null, null, null, "Viedma, Río Negro, Argentina", null); // Dejo como estaba todo antes
     }
 
     public void signWithPositionStamper(String src, String dst, int posX,int posY) throws GeneralSecurityException, BadPasswordTokenException {
@@ -286,7 +286,7 @@ public class GemaltoToken implements Token {
         //        .setPageNumber(signer.getDocument().getNumberOfPages())
         //        .setReason(reason)
         //        .setLocation(location);
-        Rectangle rect = new Rectangle(posX, posY, posX + 120, posY + 40);
+        Rectangle rect = new Rectangle(posX, posY, posX + 100, posY + 40);
         appearance.setPageRect(rect);
         //signer.setFieldName("sign");
         PdfFormXObject layer2 = appearance.getLayer2();
@@ -347,10 +347,10 @@ public class GemaltoToken implements Token {
                 //name
                 Paragraph name = new Paragraph();
                 name.add(
-                        (new Text(stampName))
+                        (new Text(stampName.replaceAll(",", "\n")))
                                 .setFont(bold)
                                 .setFontColor(ColorConstants.BLACK)
-                                .setFontSize(7)
+                                .setFontSize(8)
                 );
                 //.setBorder(new DashedBorder(greenColor,1,1));
                 //.setWidth(dataRect.getWidth() / 3);
@@ -371,7 +371,7 @@ public class GemaltoToken implements Token {
                     //.setMultipliedLeading(0.9f)
                     .setFontColor(ColorConstants.BLACK)
                     .setHorizontalAlignment(HorizontalAlignment.RIGHT);
-            sign.add(new Text( "Firmado digitalmente por " + CertificateInfo.getSubjectFields((X509Certificate) chain[0])
+            sign.add(new Text( "Firmado digitalmente por \n" + CertificateInfo.getSubjectFields((X509Certificate) chain[0])
                     .getField("CN") + '\n')
                     .setFontColor(ColorConstants.BLACK)
                     .setFontSize(5)
@@ -382,9 +382,6 @@ public class GemaltoToken implements Token {
                     .setFontSize(5)
             );//.setBorder(new DashedBorder(greenColor,1,1))
 
-            if (divideTable) {
-                sign.setWidth(dataRect.getWidth() / 3);
-            }
 
             table.addCell(
                     (new Cell())
