@@ -388,7 +388,8 @@ public class GemaltoToken implements Token {
                     (new Cell())
                             .setPadding(0).setMargin(0)
                             .setBorder(Border.NO_BORDER).add(sign)
-            ).setBorder(new DashedBorder(ColorConstants.BLACK,1,1));
+            );
+                    //.setBorder(new DashedBorder(ColorConstants.BLACK,1,1));
             layoutCanvas.add(table.setHorizontalAlignment(HorizontalAlignment.CENTER).setMarginBottom(0).setPaddingBottom(0).setSkipLastFooter(true));
 
             if (stampOccupation != null && stampOccupation.length() > 0){
