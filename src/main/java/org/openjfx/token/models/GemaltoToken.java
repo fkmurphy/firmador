@@ -174,7 +174,7 @@ public class GemaltoToken implements Token {
     }
 
     public void sign(String src, String dst) throws GeneralSecurityException, BadPasswordTokenException {
-        this.signWithPositionStamper(src,dst,140,40, null, null, null, "Viedma, Río Negro, Argentina", null); // Dejo como estaba todo antes
+        this.signWithPositionStamper(src,dst,40,40, null, null, null, "Viedma, Río Negro, Argentina", null); // Dejo como estaba todo antes
     }
 
     public void signWithPositionStamper(String src, String dst, int posX,int posY) throws GeneralSecurityException, BadPasswordTokenException {
@@ -364,7 +364,6 @@ public class GemaltoToken implements Token {
                 float[] columnWidths = {1};
                 table = new Table(columnWidths);
             }
-
 
             //signature  info
             Paragraph sign = new Paragraph()
