@@ -341,6 +341,9 @@ public class GemaltoToken implements Token {
 
             Table table;
             Boolean divideTable = false;
+            stampName = "Murphy, lalalala";
+            stampOccupation = "No nada.";
+            location = "en la cueva";
             if (stampName != null && stampName.length() > 0) {
                 float[] columnWidths = {3, 1};
                 table = new Table(columnWidths);
@@ -351,13 +354,14 @@ public class GemaltoToken implements Token {
                                 .setFont(bold)
                                 .setFontColor(ColorConstants.BLACK)
                                 .setFontSize(8)
-                );
+                ).setMarginBottom(0).setPaddingBottom(0);
                 //.setBorder(new DashedBorder(greenColor,1,1));
                 //.setWidth(dataRect.getWidth() / 3);
                 table.addCell(
                         (new Cell())
                                 .setBorder(Border.NO_BORDER)
                                 .add(name)
+                                .setPadding(0).setMargin(0)
                 );
                 divideTable = true;
             } else {
@@ -379,14 +383,15 @@ public class GemaltoToken implements Token {
                     .format(signer.getSignDate().getTime()) + '\n')
                     .setFontColor(ColorConstants.BLACK)
                     .setFontSize(5)
-            );//.setBorder(new DashedBorder(greenColor,1,1))
+            ).setMarginBottom(0).setPaddingBottom(0);//.setBorder(new DashedBorder(greenColor,1,1))
 
 
             table.addCell(
                     (new Cell())
+                            .setPadding(0).setMargin(0)
                             .setBorder(Border.NO_BORDER).add(sign)
-            );
-            layoutCanvas.add(table.setHorizontalAlignment(HorizontalAlignment.CENTER));
+            ).setBorder(new DashedBorder(ColorConstants.BLACK,1,1));
+            layoutCanvas.add(table.setHorizontalAlignment(HorizontalAlignment.CENTER).setMarginBottom(0).setPaddingBottom(0).setSkipLastFooter(true));
 
             if (stampOccupation != null && stampOccupation.length() > 0){
                 Paragraph position = new Paragraph();
@@ -395,7 +400,7 @@ public class GemaltoToken implements Token {
                                 .setFontColor(ColorConstants.BLACK)
                                 .setFontSize(5)
                 ).setTextAlignment(TextAlignment.CENTER)
-                ;
+                        .setMargin(0).setSpacingRatio(0) ;
                 layoutCanvas.add(position);
             }
 
@@ -406,7 +411,9 @@ public class GemaltoToken implements Token {
                         (new Text(location))
                                 .setFontColor(ColorConstants.BLACK)
                                 .setFontSize(5)
-                ).setMarginTop(0).setHorizontalAlignment(HorizontalAlignment.CENTER).setTextAlignment(TextAlignment.CENTER);
+                ).setHorizontalAlignment(HorizontalAlignment.CENTER).setTextAlignment(TextAlignment.CENTER)
+                .setMargin(0)
+                .setSpacingRatio(0);
 
                 //.setBorder(new DashedBorder(greenColor,1,1))
 
