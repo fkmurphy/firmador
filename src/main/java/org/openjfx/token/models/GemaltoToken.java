@@ -341,9 +341,7 @@ public class GemaltoToken implements Token {
 
             Table table;
             Boolean divideTable = false;
-            stampName = "Murphy, lalalala";
-            stampOccupation = "No nada.";
-            location = "en la cueva";
+
             if (stampName != null && stampName.length() > 0) {
                 float[] columnWidths = {3, 1};
                 table = new Table(columnWidths);
