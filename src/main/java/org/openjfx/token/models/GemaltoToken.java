@@ -340,7 +340,6 @@ public class GemaltoToken implements Token {
         try (Canvas layoutCanvas = new Canvas(canvas, signer.getDocument(), dataRect);) {
 
             Table table;
-            Boolean divideTable = false;
 
             if (stampName != null && stampName.length() > 0) {
                 float[] columnWidths = {3, 1};
@@ -359,9 +358,8 @@ public class GemaltoToken implements Token {
                         (new Cell())
                                 .setBorder(Border.NO_BORDER)
                                 .add(name)
-                                .setPadding(0).setMargin(0)
+                                .setPaddingBottom(0).setMarginBottom(0).setPaddingTop(0).setMarginTop(0)
                 );
-                divideTable = true;
             } else {
                 float[] columnWidths = {1};
                 table = new Table(columnWidths);
@@ -386,8 +384,8 @@ public class GemaltoToken implements Token {
 
             table.addCell(
                     (new Cell())
-                            .setPadding(0).setMargin(0)
-                            .setBorder(Border.NO_BORDER).add(sign)
+                    .setPaddingBottom(0).setMarginBottom(0).setPaddingTop(0).setMarginTop(0)
+                    .setBorder(Border.NO_BORDER).add(sign)
             );
                     //.setBorder(new DashedBorder(ColorConstants.BLACK,1,1));
             layoutCanvas.add(table.setHorizontalAlignment(HorizontalAlignment.CENTER).setMarginBottom(0).setPaddingBottom(0).setSkipLastFooter(true));
