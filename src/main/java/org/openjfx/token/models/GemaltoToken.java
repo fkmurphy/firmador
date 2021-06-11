@@ -248,7 +248,7 @@ public class GemaltoToken implements Token {
         //Rectangle lala = reader.getPageSize(reader.getNumberOfPages());
         FileOutputStream os = new FileOutputStream(dest);
 
-        PdfSigner signer = new PdfSigner(reader, new FileOutputStream(dest), new StampingProperties());
+        PdfSigner signer = new PdfSigner(reader, new FileOutputStream(dest), true);
 
         PdfSignatureAppearance appearance = signer.getSignatureAppearance();
 
@@ -275,6 +275,7 @@ public class GemaltoToken implements Token {
         }*/
         signer.setCertificationLevel(PdfSigner.NOT_CERTIFIED);
 
+        appearance.setSignatureCreator("sig"+ (new Random()).nextInt(25));
 
         //int lastPage = reader.getNumberOfPages();
         // 40 = 1cm
