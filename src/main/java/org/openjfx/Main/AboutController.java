@@ -13,7 +13,7 @@ public class AboutController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        version.setText("Version: 1.0.2 - 17 May 2021");
+        version.setText("Version: 1.0.3 - 11 Jun 2021");
     }
 
 }
