@@ -74,21 +74,23 @@ public class GemaltoToken implements Token {
 
         ArrayList<String> configs = new ArrayList<String>();
         ArrayList<LocalProvider> providers = providerBundle.getProviders(type);
+        Provider result = null;
         for (int n = 0; n < providers.size(); n++) {
             try {
                 File libraryFile = new File(providers.get(n).getLibrary());
                 //System.out.println("Path al archivo: " + libraryFile.getPath());
+
                 if (libraryFile.exists()) {
-                    //configs.add("--name=" + providers.get(n).getName() + "\nlibrary=" + libraryFile.getPath());
-                    return prototype.configure("--name=" + providers.get(n).getName() + "\nlibrary=" + libraryFile.getPath());
+                    result = prototype.configure("--name=" + providers.get(n).getName() + "\nlibrary=" + libraryFile.getPath());
+                    if (result.getServices().size() > 0 ) {
+                        return result;
+                    }
                 }
 
             } catch (Exception e) {
                 //e.printStackTrace();
                 //System.out.println("cargarConfiguracionProviderToken error: " + e.getMessage());
                 LOGGER.warning("ERROR al obtener el driver del token. Posiblemente no se encuentre el archivo. :::response:" + e.getMessage());
-
-                //cargarMensajeDeError("", "cargarConfiguracionProviderToken", e);
             }
         }
         return null;
