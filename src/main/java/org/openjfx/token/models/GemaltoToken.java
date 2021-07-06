@@ -1,44 +1,37 @@
 package org.openjfx.token.models;
 
 import com.itextpdf.io.font.constants.StandardFonts;
-import com.itextpdf.io.image.ImageData;
-import com.itextpdf.kernel.colors.Color;
-import com.itextpdf.kernel.colors.DeviceCmyk;
-import com.itextpdf.kernel.colors.DeviceGray;
+import com.itextpdf.kernel.colors.ColorConstants;
 import com.itextpdf.kernel.font.PdfFont;
 import com.itextpdf.kernel.font.PdfFontFactory;
-
 import com.itextpdf.kernel.geom.Rectangle;
 import com.itextpdf.kernel.pdf.PdfDocument;
 import com.itextpdf.kernel.pdf.PdfReader;
 import com.itextpdf.kernel.pdf.PdfWriter;
 import com.itextpdf.kernel.pdf.StampingProperties;
 import com.itextpdf.kernel.pdf.canvas.PdfCanvas;
+import com.itextpdf.kernel.pdf.xobject.PdfFormXObject;
 import com.itextpdf.layout.Canvas;
 import com.itextpdf.layout.borders.Border;
-import com.itextpdf.layout.borders.DashedBorder;
-import com.itextpdf.layout.borders.SolidBorder;
-import com.itextpdf.layout.element.*;
-import com.itextpdf.kernel.colors.ColorConstants;
-import com.itextpdf.kernel.pdf.xobject.PdfFormXObject;
+import com.itextpdf.layout.element.Cell;
+import com.itextpdf.layout.element.Paragraph;
+import com.itextpdf.layout.element.Table;
+import com.itextpdf.layout.element.Text;
 import com.itextpdf.layout.property.HorizontalAlignment;
-import com.itextpdf.layout.property.TextAlignment;
-import com.itextpdf.layout.property.UnitValue;
 import com.itextpdf.signatures.*;
-import com.itextpdf.io.image.ImageDataFactory;
-import org.openjfx.Main.FXMLController;
 import org.openjfx.Main.Start;
 import org.openjfx.Main.file.exceptions.BadPasswordTokenException;
 import org.openjfx.infrastructure.Log;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.security.*;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.List;
 
 public class GemaltoToken implements Token {
 
@@ -344,63 +337,61 @@ public class GemaltoToken implements Token {
 
             Table table;
 
+            HorizontalAlignment textAlign = HorizontalAlignment.LEFT;
+            float fontSize = 7;
+
+            /*
             if (stampName != null && stampName.length() > 0) {
-                float[] columnWidths = {3, 1};
+                float[] columnWidths = {1};
                 table = new Table(columnWidths);
                 //name
                 Paragraph name = new Paragraph();
-                name.add(
-                        (new Text(stampName.replaceAll(",", "\n")))
-                                .setFont(bold)
-                                .setFontColor(ColorConstants.BLACK)
-                                .setFontSize(8)
-                ).setMarginBottom(0).setPaddingBottom(0);
-                //.setBorder(new DashedBorder(greenColor,1,1));
-                //.setWidth(dataRect.getWidth() / 3);
                 table.addCell(
                         (new Cell())
                                 .setBorder(Border.NO_BORDER)
                                 .add(name)
                                 .setPaddingBottom(0).setMarginBottom(0).setPaddingTop(0).setMarginTop(0)
+                                .setPaddingLeft(0).setMarginLeft(0)
                 );
             } else {
                 float[] columnWidths = {1};
                 table = new Table(columnWidths);
             }
+            */
 
             //signature  info
             Paragraph sign = new Paragraph()
                     //.setMultipliedLeading(0.9f)
                     .setFontColor(ColorConstants.BLACK)
-                    .setHorizontalAlignment(HorizontalAlignment.RIGHT);
-            sign.add(new Text( "Firmado digitalmente por \n" + CertificateInfo.getSubjectFields((X509Certificate) chain[0])
+                    .setHorizontalAlignment(textAlign)
+                    .setMargin(0);
+            sign.add(new Text("Firmado digitalmente por \n" + CertificateInfo.getSubjectFields((X509Certificate) chain[0])
                     .getField("CN") + '\n')
                     .setFontColor(ColorConstants.BLACK)
-                    .setFontSize(5)
-            );
-            sign.add(new Text("Fecha: " + new SimpleDateFormat("dd.MM.yyyy HH:mm:ss z")
-                    .format(signer.getSignDate().getTime()) + '\n')
-                    .setFontColor(ColorConstants.BLACK)
-                    .setFontSize(5)
-            ).setMarginBottom(0).setPaddingBottom(0);//.setBorder(new DashedBorder(greenColor,1,1))
+                    .setFontSize(fontSize)
 
-
-            table.addCell(
-                    (new Cell())
-                    .setPaddingBottom(0).setMarginBottom(0).setPaddingTop(0).setMarginTop(0)
-                    .setBorder(Border.NO_BORDER).add(sign)
             );
+
+            //table.addCell(
+            //        (new Cell())
+            //        .setPaddingBottom(0).setMarginBottom(0).setPaddingTop(0).setMarginTop(0)
+            //        .setBorder(Border.NO_BORDER).add(sign)
+            //);
                     //.setBorder(new DashedBorder(ColorConstants.BLACK,1,1));
-            layoutCanvas.add(table.setHorizontalAlignment(HorizontalAlignment.CENTER).setMarginBottom(0).setPaddingBottom(0).setSkipLastFooter(true));
+            layoutCanvas.add(
+                    sign.setHorizontalAlignment(textAlign)
+                    //table.setHorizontalAlignment(textAlign)
+                    .setMarginBottom(0)
+                    .setPaddingBottom(0)
+            );
 
             if (stampOccupation != null && stampOccupation.length() > 0){
                 Paragraph position = new Paragraph();
                 position.add(
                         (new Text(stampOccupation))
                                 .setFontColor(ColorConstants.BLACK)
-                                .setFontSize(5)
-                ).setTextAlignment(TextAlignment.CENTER)
-                        .setMargin(0).setSpacingRatio(0) ;
+                                .setFontSize(fontSize)
+                ).setMargin(0).setSpacingRatio(0) ;
                 layoutCanvas.add(position);
             }
 
@@ -410,14 +401,21 @@ public class GemaltoToken implements Token {
                 locationP.add(
                         (new Text(location))
                                 .setFontColor(ColorConstants.BLACK)
-                                .setFontSize(5)
-                ).setHorizontalAlignment(HorizontalAlignment.CENTER).setTextAlignment(TextAlignment.CENTER)
+                                .setFontSize(fontSize)
+                ).setHorizontalAlignment(textAlign)
                 .setMargin(0)
                 .setSpacingRatio(0);
 
                 //.setBorder(new DashedBorder(greenColor,1,1))
-
                 layoutCanvas.add(locationP);
+
+                layoutCanvas.add(new Paragraph(new Text("Viedma, " + new SimpleDateFormat("dd.MM.yyyy HH:mm:ss")
+                        .format(signer.getSignDate().getTime()) + '\n')
+                        .setFontColor(ColorConstants.BLACK)
+                        .setFontSize(fontSize)).setHorizontalAlignment(textAlign)
+                        .setMargin(0)
+                        .setSpacingRatio(0)
+                );
             }
 
 
