@@ -12,8 +12,6 @@ import com.itextpdf.kernel.pdf.StampingProperties;
 import com.itextpdf.kernel.pdf.canvas.PdfCanvas;
 import com.itextpdf.kernel.pdf.xobject.PdfFormXObject;
 import com.itextpdf.layout.Canvas;
-import com.itextpdf.layout.borders.Border;
-import com.itextpdf.layout.element.Cell;
 import com.itextpdf.layout.element.Paragraph;
 import com.itextpdf.layout.element.Table;
 import com.itextpdf.layout.element.Text;
@@ -407,16 +405,16 @@ public class GemaltoToken implements Token {
                 //.setBorder(new DashedBorder(greenColor,1,1))
                 layoutCanvas.add(locationP);
 
-                layoutCanvas.add(new Paragraph(new Text("Viedma, " + new SimpleDateFormat("dd.MM.yyyy HH:mm:ss")
-                        .format(signer.getSignDate().getTime()) + '\n')
-                        .setFontColor(ColorConstants.BLACK)
-                        .setFontSize(fontSize)).setHorizontalAlignment(textAlign)
-                        .setMargin(0)
-                        .setSpacingRatio(0)
-                );
             }
 
 
+            layoutCanvas.add(new Paragraph(new Text("Viedma, " + new SimpleDateFormat("dd.MM.yyyy HH:mm:ss")
+                    .format(signer.getSignDate().getTime()) + '\n')
+                    .setFontColor(ColorConstants.BLACK)
+                    .setFontSize(fontSize)).setHorizontalAlignment(textAlign)
+                    .setMargin(0)
+                    .setSpacingRatio(0)
+            );
             /*paragraph.add(
                     new Image(image,
                             rect.getWidth() / 2 ,
